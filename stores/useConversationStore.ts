@@ -181,7 +181,8 @@ const useConversationStore = create<ConversationState>((set) => ({
         id: msg.metadata?.id || undefined,
       }));
 
-      // Filter out reasoning and other non-essential items for conversationItems
+      // Keep all items for conversationItems (including reasoning)
+      // The API requires reasoning items to stay paired with their messages
       const filteredConversationItems = loadedMessages
         .filter((msg: any) => msg.role && msg.content)
         .map((msg: any) => ({
