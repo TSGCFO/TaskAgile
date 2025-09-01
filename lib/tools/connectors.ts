@@ -5,7 +5,7 @@ export type GoogleConnectorOptions = {
 
 export function withGoogleConnector(
   tools: any[],
-  { enabled, accessToken }: GoogleConnectorOptions
+  { enabled, accessToken }: GoogleConnectorOptions,
 ): any[] {
   if (!enabled || !accessToken) return tools;
   return [

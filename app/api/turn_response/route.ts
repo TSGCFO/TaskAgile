@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     // Build tools list, conditionally adding the Google Calendar connector via MCP
     const toolsWithConnector = withGoogleConnector(
       Array.isArray(tools) ? tools : [],
-      { enabled: Boolean(googleIntegrationEnabled), accessToken }
+      { enabled: Boolean(googleIntegrationEnabled), accessToken },
     );
 
     const openai = new OpenAI();
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       {
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -72,7 +72,7 @@ const useToolsStore = create<StoreState>()(
         server_url: "",
         allowed_tools: "",
         skip_approval: true,
-  mcpAuthToken: "",
+        mcpAuthToken: "",
       },
       fileSearchEnabled: false,
       previousFileSearchEnabled: false,
@@ -106,8 +106,8 @@ const useToolsStore = create<StoreState>()(
     }),
     {
       name: "tools-store",
-    }
-  )
+    },
+  ),
 );
 
 export default useToolsStore;

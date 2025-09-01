@@ -1,4 +1,11 @@
-import { pgTable, serial, text, timestamp, jsonb, varchar } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  jsonb,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -18,7 +25,9 @@ export const conversations = pgTable("conversations", {
 // Messages table - stores individual messages in conversations
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  conversationId: serial("conversation_id").references(() => conversations.id, { onDelete: "cascade" }).notNull(),
+  conversationId: serial("conversation_id")
+    .references(() => conversations.id, { onDelete: "cascade" })
+    .notNull(),
   role: text("role", { enum: ["user", "assistant", "system"] }).notNull(),
   content: jsonb("content").notNull(),
   metadata: jsonb("metadata").$type<{

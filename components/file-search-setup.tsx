@@ -22,7 +22,7 @@ export default function FileSearchSetup() {
   const handleAddStore = async (storeId: string) => {
     if (storeId.trim()) {
       const newStore = await fetch(
-        `/api/vector_stores/retrieve_store?vector_store_id=${storeId}`
+        `/api/vector_stores/retrieve_store?vector_store_id=${storeId}`,
       ).then((res) => res.json());
       if (newStore.id) {
         console.log("Retrieved store:", newStore);

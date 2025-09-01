@@ -32,14 +32,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const tokenResponse = await authorizationCodeGrant(
-      config,
-      url,
-      {
-        expectedState: stateCookie,
-        pkceCodeVerifier: verifier,
-      }
-    );
+    const tokenResponse = await authorizationCodeGrant(config, url, {
+      expectedState: stateCookie,
+      pkceCodeVerifier: verifier,
+    });
 
     const now = Date.now();
     const tokens: OAuthTokens = {
@@ -66,10 +62,13 @@ export async function GET(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 60 * 24 * 7, // 7 days
     };
-    if (tokens.access_token) jar.set("gc_access_token", tokens.access_token, cookieOptions);
-    if (tokens.refresh_token) jar.set("gc_refresh_token", tokens.refresh_token, cookieOptions);
+    if (tokens.access_token)
+      jar.set("gc_access_token", tokens.access_token, cookieOptions);
+    if (tokens.refresh_token)
+      jar.set("gc_refresh_token", tokens.refresh_token, cookieOptions);
     if (tokens.id_token) jar.set("gc_id_token", tokens.id_token, cookieOptions);
-    if (tokens.expires_at) jar.set("gc_expires_at", String(tokens.expires_at), cookieOptions);
+    if (tokens.expires_at)
+      jar.set("gc_expires_at", String(tokens.expires_at), cookieOptions);
 
     return NextResponse.redirect(new URL("/?connected=1", request.url));
   } catch {

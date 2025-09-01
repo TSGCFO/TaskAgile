@@ -8,7 +8,7 @@ export async function GET(request: Request) {
 
   try {
     const vectorStore = await openai.vectorStores.files.list(
-      vectorStoreId || ""
+      vectorStoreId || "",
     );
     return new Response(JSON.stringify(vectorStore), { status: 200 });
   } catch (error) {

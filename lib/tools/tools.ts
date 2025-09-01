@@ -12,9 +12,7 @@ export const getTools = () => {
   const addWebSearch = () => {
     if (!state.webSearchEnabled) return;
     const loc = state.webSearchConfig.user_location;
-    const hasLocation = !!(
-      loc && (loc.country || loc.region || loc.city)
-    );
+    const hasLocation = !!(loc && (loc.country || loc.region || loc.city));
     const tool: WebSearchTool = { type: "web_search" };
     if (hasLocation && loc) tool.user_location = loc;
     tools.push(tool);
@@ -24,7 +22,10 @@ export const getTools = () => {
     if (!state.fileSearchEnabled) return;
     // Only add file search if we have a valid vector store ID
     if (state.vectorStore?.id) {
-      tools.push({ type: "file_search", vector_store_ids: [state.vectorStore.id] });
+      tools.push({
+        type: "file_search",
+        vector_store_ids: [state.vectorStore.id],
+      });
     }
   };
 
@@ -48,7 +49,7 @@ export const getTools = () => {
           additionalProperties: false,
         },
         strict: true,
-      }))
+      })),
     );
   };
 

@@ -75,7 +75,7 @@ export type Item =
 export const handleTurn = async (
   messages: any[],
   tools: any[],
-  onMessage: (data: any) => void
+  onMessage: (data: any) => void,
 ) => {
   try {
     const { googleIntegrationEnabled } = useToolsStore.getState();
@@ -315,7 +315,7 @@ export const processMessages = async () => {
           setChatMessages([...chatMessages]);
         }
         // Only add non-reasoning items to conversationItems for API
-        if (item && item.type !== 'reasoning') {
+        if (item && item.type !== "reasoning") {
           conversationItems.push(item);
           setConversationItems([...conversationItems]);
         }
@@ -327,7 +327,7 @@ export const processMessages = async () => {
           // Handle tool call (execute function)
           const toolResult = await handleTool(
             toolCallMessage.name as keyof typeof functionsMap,
-            toolCallMessage.parsedArguments
+            toolCallMessage.parsedArguments,
           );
 
           // Record tool output
@@ -458,7 +458,7 @@ export const processMessages = async () => {
               m.type === "tool_call" &&
               m.tool_type === "code_interpreter_call" &&
               m.status !== "completed" &&
-              m.id === item_id
+              m.id === item_id,
           ) as ToolCallItem | undefined;
         // Accumulate deltas to show the code streaming
         if (toolCallMessage) {
@@ -477,7 +477,7 @@ export const processMessages = async () => {
               m.type === "tool_call" &&
               m.tool_type === "code_interpreter_call" &&
               m.status !== "completed" &&
-              m.id === item_id
+              m.id === item_id,
           ) as ToolCallItem | undefined;
 
         // Mark the call as completed and set the code
@@ -492,7 +492,7 @@ export const processMessages = async () => {
       case "response.code_interpreter_call.completed": {
         const { item_id } = data;
         const toolCallMessage = chatMessages.find(
-          (m) => m.type === "tool_call" && m.id === item_id
+          (m) => m.type === "tool_call" && m.id === item_id,
         ) as ToolCallItem | undefined;
         if (toolCallMessage) {
           toolCallMessage.status = "completed";
@@ -507,7 +507,7 @@ export const processMessages = async () => {
 
         // Handle MCP tools list (append all lists, not just the first)
         const mcpListToolsMessages = response.output.filter(
-          (m: Item) => m.type === "mcp_list_tools"
+          (m: Item) => m.type === "mcp_list_tools",
         ) as McpListToolsItem[];
 
         if (mcpListToolsMessages && mcpListToolsMessages.length > 0) {
@@ -524,7 +524,7 @@ export const processMessages = async () => {
 
         // Handle MCP approval request
         const mcpApprovalRequestMessage = response.output.find(
-          (m: Item) => m.type === "mcp_approval_request"
+          (m: Item) => m.type === "mcp_approval_request",
         );
 
         if (mcpApprovalRequestMessage) {

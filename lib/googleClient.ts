@@ -12,7 +12,7 @@ export async function getGoogleClient(): Promise<Configuration> {
 
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
     throw new Error(
-      "Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables"
+      "Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables",
     );
   }
 
@@ -20,14 +20,17 @@ export async function getGoogleClient(): Promise<Configuration> {
   cachedConfig = await discovery(
     new URL("https://accounts.google.com"),
     GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET
+    GOOGLE_CLIENT_SECRET,
   );
 
   return cachedConfig;
 }
 
 export function getRedirectUri(): string {
-  const { GOOGLE_REDIRECT_URI } = process.env as Record<string, string | undefined>;
+  const { GOOGLE_REDIRECT_URI } = process.env as Record<
+    string,
+    string | undefined
+  >;
   return GOOGLE_REDIRECT_URI || "http://localhost:3000/api/google/callback";
 }
 

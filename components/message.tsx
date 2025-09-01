@@ -37,7 +37,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
                       (a) =>
                         a.type === "container_file_citation" &&
                         a.filename &&
-                        /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(a.filename)
+                        /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(a.filename),
                     )
                     .map((a, i) => (
                       <img

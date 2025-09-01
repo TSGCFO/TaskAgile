@@ -1,13 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 import useToolsStore from "@/stores/useToolsStore";
 
 export default function GoogleIntegrationPanel() {
   const [connected, setConnected] = useState<boolean>(false);
   const [oauthConfigured, setOauthConfigured] = useState<boolean>(false);
-  const googleIntegrationEnabled = useToolsStore((s) => s.googleIntegrationEnabled);
+  const googleIntegrationEnabled = useToolsStore(
+    (s) => s.googleIntegrationEnabled,
+  );
 
   useEffect(() => {
     fetch("/api/google/status")
@@ -46,7 +53,9 @@ export default function GoogleIntegrationPanel() {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>
-                    GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REDIRECT_URI must be set in .env.local to use the Google Integration.
+                    GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and
+                    GOOGLE_REDIRECT_URI must be set in .env.local to use the
+                    Google Integration.
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -69,7 +78,9 @@ export default function GoogleIntegrationPanel() {
                 clipRule="evenodd"
               />
             </svg>
-            <p className="text-sm text-gray-700">Google Integration connected</p>
+            <p className="text-sm text-gray-700">
+              Google Integration connected
+            </p>
           </div>
         </div>
       )}

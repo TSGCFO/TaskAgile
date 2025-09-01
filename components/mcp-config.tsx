@@ -13,7 +13,7 @@ export default function McpConfig() {
       server_url: "",
       allowed_tools: "",
       skip_approval: false,
-  mcpAuthToken: "",
+      mcpAuthToken: "",
     });
   };
 
@@ -98,7 +98,10 @@ export default function McpConfig() {
             className="bg-white border text-sm flex-1 text-zinc-900 placeholder:text-zinc-400"
             value={mcpConfig.mcpAuthToken || ""}
             onChange={(e) =>
-              setMcpConfig({ ...mcpConfig, mcpAuthToken: e.target.value.trim() })
+              setMcpConfig({
+                ...mcpConfig,
+                mcpAuthToken: e.target.value.trim(),
+              })
             }
           />
         </div>

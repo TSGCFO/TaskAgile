@@ -62,8 +62,9 @@ const useConversationStore = create<ConversationState>((set) => ({
   setCurrentConversationId: (id) => set({ currentConversationId: id }),
   saveConversation: async (title) => {
     const state = useConversationStore.getState();
-    const conversationTitle = title || `Conversation ${new Date().toLocaleDateString()}`;
-    
+    const conversationTitle =
+      title || `Conversation ${new Date().toLocaleDateString()}`;
+
     try {
       // Get current tools configuration
       const toolsState = useToolsStore.getState();
@@ -75,36 +76,36 @@ const useConversationStore = create<ConversationState>((set) => ({
         codeInterpreterEnabled: toolsState.codeInterpreterEnabled,
         mcpEnabled: toolsState.mcpEnabled,
         vectorStoreId: toolsState.vectorStore?.id || null,
-        model: 'gpt-4o',
-        timestamp: new Date().toISOString()
+        model: "gpt-4o",
+        timestamp: new Date().toISOString(),
       };
-      
+
       // Create or update conversation
       const response = state.currentConversationId
         ? await fetch(`/api/conversations/${state.currentConversationId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
               title: conversationTitle,
-              metadata: toolsMetadata
+              metadata: toolsMetadata,
             }),
           })
-        : await fetch('/api/conversations', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
+        : await fetch("/api/conversations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
               title: conversationTitle,
-              metadata: toolsMetadata
+              metadata: toolsMetadata,
             }),
           });
-      
+
       const conversation = await response.json();
-      
+
       // Save messages if we have any (filter out non-message items)
       if (state.chatMessages.length > 0) {
         const messagesToSave = state.chatMessages
-          .filter(msg => msg.type === 'message')
-          .map(msg => ({
+          .filter((msg) => msg.type === "message")
+          .map((msg) => ({
             role: msg.role,
             content: msg.content,
             metadata: {
@@ -112,28 +113,31 @@ const useConversationStore = create<ConversationState>((set) => ({
               type: msg.type,
               id: (msg as any).id || null,
               toolCalls: state.chatMessages
-                .filter(item => item.type === 'tool_call' && 
-                       (item as any).status === 'completed')
+                .filter(
+                  (item) =>
+                    item.type === "tool_call" &&
+                    (item as any).status === "completed",
+                )
                 .map((tc: any) => ({
                   id: tc.id,
                   name: tc.name,
                   tool_type: tc.tool_type,
-                  output: tc.output
-                }))
-            }
+                  output: tc.output,
+                })),
+            },
           }));
-        
+
         await fetch(`/api/conversations/${conversation.id}/messages`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(messagesToSave),
         });
       }
-      
+
       set({ currentConversationId: conversation.id });
       return conversation.id;
     } catch (error) {
-      console.error('Failed to save conversation:', error);
+      console.error("Failed to save conversation:", error);
       throw error;
     }
   },
@@ -141,7 +145,7 @@ const useConversationStore = create<ConversationState>((set) => ({
     try {
       const response = await fetch(`/api/conversations/${id}`);
       const data = await response.json();
-      
+
       // Restore tools configuration if metadata exists
       if (data.metadata) {
         const toolsStore = useToolsStore.getState();
@@ -155,39 +159,43 @@ const useConversationStore = create<ConversationState>((set) => ({
           toolsStore.setFunctionsEnabled(data.metadata.functionsEnabled);
         }
         if (data.metadata.googleIntegrationEnabled !== undefined) {
-          toolsStore.setGoogleIntegrationEnabled(data.metadata.googleIntegrationEnabled);
+          toolsStore.setGoogleIntegrationEnabled(
+            data.metadata.googleIntegrationEnabled,
+          );
         }
         if (data.metadata.codeInterpreterEnabled !== undefined) {
-          toolsStore.setCodeInterpreterEnabled(data.metadata.codeInterpreterEnabled);
+          toolsStore.setCodeInterpreterEnabled(
+            data.metadata.codeInterpreterEnabled,
+          );
         }
         if (data.metadata.mcpEnabled !== undefined) {
           toolsStore.setMcpEnabled(data.metadata.mcpEnabled);
         }
       }
-      
+
       // Convert saved messages to chat format
       const loadedMessages = data.messages.map((msg: any) => ({
-        type: 'message',
+        type: "message",
         role: msg.role,
         content: msg.content,
         id: msg.metadata?.id || undefined,
       }));
-      
+
       // Filter out reasoning and other non-essential items for conversationItems
       const filteredConversationItems = loadedMessages
         .filter((msg: any) => msg.role && msg.content)
         .map((msg: any) => ({
           role: msg.role,
-          content: msg.content
+          content: msg.content,
         }));
-      
+
       set({
         chatMessages: loadedMessages,
         conversationItems: filteredConversationItems,
         currentConversationId: id,
       });
     } catch (error) {
-      console.error('Failed to load conversation:', error);
+      console.error("Failed to load conversation:", error);
       throw error;
     }
   },

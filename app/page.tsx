@@ -15,7 +15,9 @@ export default function Main() {
   // uses the connector-enabled server configuration immediately
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const isConnected = new URLSearchParams(window.location.search).get("connected");
+    const isConnected = new URLSearchParams(window.location.search).get(
+      "connected",
+    );
     if (isConnected === "1") {
       resetConversation();
       router.replace("/", { scroll: false });

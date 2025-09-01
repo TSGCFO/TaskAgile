@@ -106,3 +106,5 @@ Optional:
 - **Auth**: `openid-client` for Google OAuth
 - **Streaming**: Native ReadableStream with manual SSE formatting
 - **JSON Parsing**: `partial-json` for streaming argument parsing
+
+Documentation to reference @openaiStructuredModelOutputs.md

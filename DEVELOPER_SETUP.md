@@ -38,7 +38,7 @@ npm install react-markdown@^9.0.1 react-syntax-highlighter@^15.6.1 highlight.js@
 # Google OAuth
 npm install openid-client@^6.6.4
 
-# Dev dependencies  
+# Dev dependencies
 npm install --save-dev @types/react-syntax-highlighter@^15.5.13
 ```
 
@@ -135,7 +135,11 @@ export const toolsList = [
     description: "Get the weather for a given location",
     parameters: {
       location: { type: "string", description: "Location to get weather for" },
-      unit: { type: "string", description: "Unit to get weather in", enum: ["celsius", "fahrenheit"] },
+      unit: {
+        type: "string",
+        description: "Unit to get weather in",
+        enum: ["celsius", "fahrenheit"],
+      },
     },
   },
   {
@@ -149,8 +153,16 @@ export const toolsList = [
 **`config/functions.ts`**:
 
 ```typescript
-export const get_weather = async ({ location, unit }: { location: string; unit: string }) => {
-  const res = await fetch(`/api/functions/get_weather?location=${location}&unit=${unit}`).then((res) => res.json());
+export const get_weather = async ({
+  location,
+  unit,
+}: {
+  location: string;
+  unit: string;
+}) => {
+  const res = await fetch(
+    `/api/functions/get_weather?location=${location}&unit=${unit}`,
+  ).then((res) => res.json());
   return res;
 };
 
@@ -186,18 +198,35 @@ interface ConversationState {
 }
 
 const useConversationStore = create<ConversationState>((set) => ({
-  chatMessages: [{ type: "message", role: "assistant", content: [{ type: "output_text", text: INITIAL_MESSAGE }] }],
+  chatMessages: [
+    {
+      type: "message",
+      role: "assistant",
+      content: [{ type: "output_text", text: INITIAL_MESSAGE }],
+    },
+  ],
   conversationItems: [],
   isAssistantLoading: false,
   setChatMessages: (items) => set({ chatMessages: items }),
   setConversationItems: (messages) => set({ conversationItems: messages }),
-  addChatMessage: (item) => set((state) => ({ chatMessages: [...state.chatMessages, item] })),
-  addConversationItem: (message) => set((state) => ({ conversationItems: [...state.conversationItems, message] })),
+  addChatMessage: (item) =>
+    set((state) => ({ chatMessages: [...state.chatMessages, item] })),
+  addConversationItem: (message) =>
+    set((state) => ({
+      conversationItems: [...state.conversationItems, message],
+    })),
   setAssistantLoading: (loading) => set({ isAssistantLoading: loading }),
-  resetConversation: () => set(() => ({
-    chatMessages: [{ type: "message", role: "assistant", content: [{ type: "output_text", text: INITIAL_MESSAGE }] }],
-    conversationItems: [],
-  })),
+  resetConversation: () =>
+    set(() => ({
+      chatMessages: [
+        {
+          type: "message",
+          role: "assistant",
+          content: [{ type: "output_text", text: INITIAL_MESSAGE }],
+        },
+      ],
+      conversationItems: [],
+    })),
 }));
 
 export default useConversationStore;
@@ -217,7 +246,7 @@ import OpenAI from "openai";
 export async function POST(request: Request) {
   try {
     const { messages, tools } = await request.json();
-    
+
     const openai = new OpenAI();
     const events = await openai.responses.create({
       model: MODEL,
@@ -251,7 +280,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Error in POST handler:", error);
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 },
+    );
   }
 }
 ```
@@ -266,17 +298,21 @@ export async function GET(request: Request) {
     const unit = searchParams.get("unit");
 
     // Get coordinates
-    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${location}&format=json`);
+    const geoRes = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${location}&format=json`,
+    );
     const geoData = await geoRes.json();
     if (!geoData.length) {
-      return new Response(JSON.stringify({ error: "Invalid location" }), { status: 404 });
+      return new Response(JSON.stringify({ error: "Invalid location" }), {
+        status: 404,
+      });
     }
 
     const { lat, lon } = geoData[0];
 
     // Get weather
     const weatherRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&temperature_unit=${unit ?? "celsius"}`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&temperature_unit=${unit ?? "celsius"}`,
     );
     const weather = await weatherRes.json();
 
@@ -284,11 +320,16 @@ export async function GET(request: Request) {
     const now = new Date();
     const currentHourISO = now.toISOString().slice(0, 13) + ":00";
     const index = weather.hourly.time.indexOf(currentHourISO);
-    const currentTemperature = index !== -1 ? weather.hourly.temperature_2m[index] : null;
+    const currentTemperature =
+      index !== -1 ? weather.hourly.temperature_2m[index] : null;
 
-    return new Response(JSON.stringify({ temperature: currentTemperature }), { status: 200 });
+    return new Response(JSON.stringify({ temperature: currentTemperature }), {
+      status: 200,
+    });
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Error getting weather" }), { status: 500 });
+    return new Response(JSON.stringify({ error: "Error getting weather" }), {
+      status: 500,
+    });
   }
 }
 ```
@@ -360,7 +401,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ### Google Cloud Console
 
 1. Create new project or use existing
-2. Enable APIs: Google Calendar API, Gmail API  
+2. Enable APIs: Google Calendar API, Gmail API
 3. Create OAuth 2.0 credentials (Web application)
 4. Add authorized redirect URI: `http://localhost:3000/api/google/callback`
 5. Configure OAuth consent screen with required scopes:

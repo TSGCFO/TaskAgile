@@ -22,7 +22,7 @@ export default function WebSearchSettings() {
 
   const handleLocationChange = (
     field: "country" | "region" | "city",
-    value: string
+    value: string,
   ) => {
     setWebSearchConfig({
       ...webSearchConfig,

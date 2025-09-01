@@ -39,7 +39,7 @@ const Chat: React.FC<ChatProps> = ({
         setinputMessageText("");
       }
     },
-    [onSendMessage, inputMessageText, isComposing]
+    [onSendMessage, inputMessageText, isComposing],
   );
 
   useEffect(() => {
@@ -104,7 +104,7 @@ const Chat: React.FC<ChatProps> = ({
                     disabled={!inputMessageText}
                     data-testid="send-button"
                     className="flex size-8 items-end justify-center rounded-full bg-black text-white transition-colors hover:opacity-70 focus-visible:outline-none focus-visible:outline-black disabled:bg-[#D7D7D7] disabled:text-[#f4f4f4] disabled:hover:opacity-100"
-                  onClick={() => {
+                    onClick={() => {
                       onSendMessage(inputMessageText);
                       setinputMessageText("");
                     }}

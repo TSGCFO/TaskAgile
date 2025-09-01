@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Save, History, Trash2, MessageSquare, Plus } from "lucide-react";
 import useConversationStore from "@/stores/useConversationStore";
 
@@ -20,12 +26,12 @@ export function ConversationHistory() {
   const [saveTitle, setSaveTitle] = useState("");
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
-  const { 
-    saveConversation, 
-    loadConversation, 
+
+  const {
+    saveConversation,
+    loadConversation,
     resetConversation,
-    currentConversationId 
+    currentConversationId,
   } = useConversationStore();
 
   // Fetch conversations list
@@ -91,8 +97,8 @@ export function ConversationHistory() {
       {/* Save Conversation Button */}
       <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
         <DialogTrigger asChild>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             className="gap-2"
             title="Save current conversation"
@@ -113,12 +119,13 @@ export function ConversationHistory() {
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
             />
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsSaveDialogOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSave}>
-                Save Conversation
-              </Button>
+              <Button onClick={handleSave}>Save Conversation</Button>
             </div>
           </div>
         </DialogContent>
@@ -127,8 +134,8 @@ export function ConversationHistory() {
       {/* History Button */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             className="gap-2"
             title="View conversation history"
@@ -141,10 +148,10 @@ export function ConversationHistory() {
           <DialogHeader>
             <DialogTitle>Conversation History</DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {/* New Conversation Button */}
-            <Button 
+            <Button
               onClick={handleNewConversation}
               className="w-full gap-2"
               variant="outline"
@@ -165,14 +172,14 @@ export function ConversationHistory() {
                 </div>
               ) : (
                 conversations.map((conv) => (
-                  <div 
-                    key={conv.id} 
+                  <div
+                    key={conv.id}
                     className={`p-3 rounded-lg border hover:bg-gray-50 transition-colors cursor-pointer ${
-                      currentConversationId === conv.id ? 'bg-gray-100' : ''
+                      currentConversationId === conv.id ? "bg-gray-100" : ""
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <div 
+                      <div
                         className="flex-1 flex items-center gap-2"
                         onClick={() => handleLoad(conv.id)}
                       >
@@ -180,7 +187,7 @@ export function ConversationHistory() {
                         <div className="flex-1">
                           <h4 className="font-medium">{conv.title}</h4>
                           <p className="text-xs text-gray-500">
-                            {new Date(conv.updatedAt).toLocaleDateString()} at{' '}
+                            {new Date(conv.updatedAt).toLocaleDateString()} at{" "}
                             {new Date(conv.updatedAt).toLocaleTimeString()}
                           </p>
                         </div>

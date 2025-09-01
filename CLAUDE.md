@@ -15,6 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Next.js 15 (App Router) TypeScript application that demonstrates the OpenAI Responses API with streaming and tool calling capabilities. The app provides a chat interface with multi-turn conversation handling.
 
 ### Core Flow
+
 1. UI builds tool list from user toggles in `useToolsStore`
 2. Chat submission triggers `processMessages` in `lib/assistant.ts`, which calls `/api/turn_response`
 3. API route assembles OpenAI request, conditionally injects Google MCP connectors, streams SSE events
@@ -24,26 +25,31 @@ This is a Next.js 15 (App Router) TypeScript application that demonstrates the O
 ### Key Directories & Files
 
 **Configuration**
+
 - `config/constants.ts`: Model name and dynamic developer prompt with date injection
 - `config/tools-list.ts`: Declarative function tool schemas (must match `config/functions.ts`)
 - `config/functions.ts`: Browser-side function wrappers that fetch internal API endpoints
 
 **Core Logic**
+
 - `lib/assistant.ts`: Streaming event state machine and message processing
 - `lib/tools/tools.ts`: Composes tools array from Zustand state
 - `lib/tools/connectors.ts`: Google MCP connector helpers
 
 **State Management**
+
 - `stores/useConversationStore.ts`: Chat messages and conversation items
 - `stores/useToolsStore.ts`: Tool configuration and settings
 
 **API Routes**
+
 - `app/api/turn_response/route.ts`: Main endpoint for OpenAI Responses API calls
 - `app/api/functions/*`: Server-side function implementations
 - `app/api/vector_stores/*`: Vector store CRUD operations
 - `app/api/google/*`: Google OAuth flow handlers
 
 **UI Components**
+
 - `components/assistant.tsx`: Main chat interface
 - `components/tool-call.tsx`: Tool execution progress display
 - `components/tools-panel.tsx`: Tool configuration panel
@@ -51,12 +57,14 @@ This is a Next.js 15 (App Router) TypeScript application that demonstrates the O
 ## Tool Integration Patterns
 
 ### Adding New Function Tools
+
 1. Add schema to `config/tools-list.ts`
 2. Create API route under `app/api/functions/<name>/route.ts`
 3. Add client wrapper to `config/functions.ts` and export in `functionsMap`
 4. Both schema and function must use identical parameter names
 
 ### Tool Types Supported
+
 - **Web Search**: Built-in OpenAI tool with optional location configuration
 - **File Search**: Uses vector stores for document search
 - **Code Interpreter**: Python code execution
@@ -73,6 +81,7 @@ This is a Next.js 15 (App Router) TypeScript application that demonstrates the O
 ## Google Integration
 
 Requires OAuth setup with Google Cloud Console:
+
 - Enable Google Calendar API and Gmail API
 - Configure OAuth client with redirect URI: `http://localhost:3000/api/google/callback`
 - Set environment variables: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
@@ -80,9 +89,11 @@ Requires OAuth setup with Google Cloud Console:
 ## Environment Variables
 
 Required:
+
 - `OPENAI_API_KEY`: OpenAI API access
 
 Optional:
+
 - `GOOGLE_CLIENT_ID`: Google OAuth client ID
 - `GOOGLE_CLIENT_SECRET`: Google OAuth client secret
 - `GOOGLE_REDIRECT_URI`: OAuth redirect URI (defaults to localhost:3000)

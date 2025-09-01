@@ -12,7 +12,7 @@ export const get_weather = async ({
   console.log("location", location);
   console.log("unit", unit);
   const res = await fetch(
-    `/api/functions/get_weather?location=${location}&unit=${unit}`
+    `/api/functions/get_weather?location=${location}&unit=${unit}`,
   ).then((res) => res.json());
 
   console.log("executed get_weather function", res);

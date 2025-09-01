@@ -6,27 +6,27 @@ import { Item, processMessages } from "@/lib/assistant";
 import { ConversationHistory } from "./conversation-history";
 
 export default function Assistant() {
-  const { 
-    chatMessages, 
-    addConversationItem, 
-    addChatMessage, 
+  const {
+    chatMessages,
+    addConversationItem,
+    addChatMessage,
     setAssistantLoading,
     saveConversation,
-    currentConversationId 
+    currentConversationId,
   } = useConversationStore();
-  
+
   const lastSaveTime = useRef<number>(Date.now());
   const messageCount = useRef<number>(chatMessages.length);
-  
+
   // Auto-save functionality
   useEffect(() => {
     const currentMessageCount = chatMessages.length;
-    
+
     // Auto-save every 5 messages or every 5 minutes
     if (currentConversationId && currentMessageCount > messageCount.current) {
       const timeSinceLastSave = Date.now() - lastSaveTime.current;
       const messagesSinceLastSave = currentMessageCount - messageCount.current;
-      
+
       if (messagesSinceLastSave >= 5 || timeSinceLastSave > 5 * 60 * 1000) {
         saveConversation();
         lastSaveTime.current = Date.now();
@@ -58,10 +58,7 @@ export default function Assistant() {
     }
   };
 
-  const handleApprovalResponse = async (
-    approve: boolean,
-    id: string
-  ) => {
+  const handleApprovalResponse = async (approve: boolean, id: string) => {
     const approvalItem = {
       type: "mcp_approval_response",
       approve,
