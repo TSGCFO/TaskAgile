@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { Item } from "@/lib/assistant";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { INITIAL_MESSAGE } from "@/config/constants";
+import useToolsStore from "@/stores/useToolsStore";
 
 interface ConversationState {
   // Items displayed in the chat
@@ -64,19 +65,36 @@ const useConversationStore = create<ConversationState>((set) => ({
     const conversationTitle = title || `Conversation ${new Date().toLocaleDateString()}`;
     
     try {
+      // Get current tools configuration
+      const toolsState = useToolsStore.getState();
+      const toolsMetadata = {
+        fileSearchEnabled: toolsState.fileSearchEnabled,
+        webSearchEnabled: toolsState.webSearchEnabled,
+        functionsEnabled: toolsState.functionsEnabled,
+        googleIntegrationEnabled: toolsState.googleIntegrationEnabled,
+        codeInterpreterEnabled: toolsState.codeInterpreterEnabled,
+        mcpEnabled: toolsState.mcpEnabled,
+        vectorStoreId: toolsState.vectorStore?.id || null,
+        model: 'gpt-4o',
+        timestamp: new Date().toISOString()
+      };
+      
       // Create or update conversation
       const response = state.currentConversationId
         ? await fetch(`/api/conversations/${state.currentConversationId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: conversationTitle }),
+            body: JSON.stringify({ 
+              title: conversationTitle,
+              metadata: toolsMetadata
+            }),
           })
         : await fetch('/api/conversations', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
               title: conversationTitle,
-              metadata: {}
+              metadata: toolsMetadata
             }),
           });
       
@@ -89,7 +107,20 @@ const useConversationStore = create<ConversationState>((set) => ({
           .map(msg => ({
             role: msg.role,
             content: msg.content,
-            metadata: {}
+            metadata: {
+              timestamp: new Date().toISOString(),
+              type: msg.type,
+              id: (msg as any).id || null,
+              toolCalls: state.chatMessages
+                .filter(item => item.type === 'tool_call' && 
+                       (item as any).status === 'completed')
+                .map((tc: any) => ({
+                  id: tc.id,
+                  name: tc.name,
+                  tool_type: tc.tool_type,
+                  output: tc.output
+                }))
+            }
           }));
         
         await fetch(`/api/conversations/${conversation.id}/messages`, {
@@ -111,11 +142,35 @@ const useConversationStore = create<ConversationState>((set) => ({
       const response = await fetch(`/api/conversations/${id}`);
       const data = await response.json();
       
+      // Restore tools configuration if metadata exists
+      if (data.metadata) {
+        const toolsStore = useToolsStore.getState();
+        if (data.metadata.fileSearchEnabled !== undefined) {
+          toolsStore.setFileSearchEnabled(data.metadata.fileSearchEnabled);
+        }
+        if (data.metadata.webSearchEnabled !== undefined) {
+          toolsStore.setWebSearchEnabled(data.metadata.webSearchEnabled);
+        }
+        if (data.metadata.functionsEnabled !== undefined) {
+          toolsStore.setFunctionsEnabled(data.metadata.functionsEnabled);
+        }
+        if (data.metadata.googleIntegrationEnabled !== undefined) {
+          toolsStore.setGoogleIntegrationEnabled(data.metadata.googleIntegrationEnabled);
+        }
+        if (data.metadata.codeInterpreterEnabled !== undefined) {
+          toolsStore.setCodeInterpreterEnabled(data.metadata.codeInterpreterEnabled);
+        }
+        if (data.metadata.mcpEnabled !== undefined) {
+          toolsStore.setMcpEnabled(data.metadata.mcpEnabled);
+        }
+      }
+      
       // Convert saved messages to chat format
       const loadedMessages = data.messages.map((msg: any) => ({
         type: 'message',
         role: msg.role,
         content: msg.content,
+        id: msg.metadata?.id || undefined,
       }));
       
       // Filter out reasoning and other non-essential items for conversationItems
