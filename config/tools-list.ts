@@ -1,0 +1,15 @@
+export const toolsList = [
+  {
+    name: "get_weather",
+    description: "Get the weather for a given location",
+    parameters: {
+      location: { type: "string", description: "Location to get weather for" },
+      unit: { type: "string", description: "Unit to get weather in", enum: ["celsius", "fahrenheit"] },
+    },
+  },
+  {
+    name: "get_joke",
+    description: "Get a programming joke",
+    parameters: {},
+  },
+];
