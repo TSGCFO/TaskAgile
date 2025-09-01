@@ -8,13 +8,14 @@ interface MessageProps {
 
 const Message: React.FC<MessageProps> = ({ message }) => {
   return (
-    <div className="text-sm animate-in fade-in-0 slide-in-from-bottom-3 duration-300">
+    <div className="text-base animate-in fade-in-0 slide-in-from-bottom-5 duration-500">
       {message.role === "user" ? (
         <div className="flex justify-end">
-          <div className="max-w-[80%]">
-            <div className="ml-4 rounded-2xl px-5 py-3 md:ml-24 bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:shadow-xl">
-              <div>
-                <div className="prose prose-sm prose-primary dark:prose-invert max-w-none">
+          <div className="max-w-[75%] group">
+            <div className="relative ml-4 md:ml-24">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-3xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+              <div className="relative rounded-3xl px-6 py-4 animated-gradient text-primary-foreground shadow-2xl transition-all duration-300 hover:scale-[1.02]">
+                <div className="prose prose-sm prose-invert max-w-none">
                   <ReactMarkdown>
                     {message.content[0].text as string}
                   </ReactMarkdown>
@@ -26,11 +27,13 @@ const Message: React.FC<MessageProps> = ({ message }) => {
       ) : (
         <div className="flex flex-col">
           <div className="flex">
-            <div className="mr-4 rounded-2xl px-5 py-3 md:mr-24 bg-card text-card-foreground shadow-lg border border-border/50 transition-all duration-200 hover:shadow-xl max-w-[80%]">
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <ReactMarkdown>
-                  {message.content[0].text as string}
-                </ReactMarkdown>
+            <div className="mr-4 md:mr-24 max-w-[75%] group">
+              <div className="glass rounded-3xl px-6 py-4 shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] border border-border/30">
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown>
+                    {message.content[0].text as string}
+                  </ReactMarkdown>
+                </div>
                 {message.content[0].annotations &&
                   message.content[0].annotations
                     .filter(
@@ -44,7 +47,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
                         key={i}
                         src={`/api/container_files/content?file_id=${a.fileId}${a.containerId ? `&container_id=${a.containerId}` : ""}${a.filename ? `&filename=${encodeURIComponent(a.filename)}` : ""}`}
                         alt={a.filename || ""}
-                        className="mt-2 max-w-full"
+                        className="mt-4 max-w-full rounded-xl shadow-lg"
                       />
                     ))}
               </div>

@@ -100,11 +100,11 @@ export function ConversationHistory() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 hover:shadow-md transition-all duration-200 hover:scale-105 border-border/50 bg-card/50 backdrop-blur-sm"
+            className="glass gap-2 hover:shadow-xl transition-all duration-300 hover:scale-105 border-border/30 hover:border-primary/30 group"
             title="Save current conversation"
           >
-            <Save className="h-4 w-4" />
-            Save
+            <Save className="h-4 w-4 group-hover:text-primary transition-colors duration-300" />
+            <span className="group-hover:text-primary transition-colors duration-300">Save</span>
           </Button>
         </DialogTrigger>
         <DialogContent>
@@ -137,11 +137,11 @@ export function ConversationHistory() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 hover:shadow-md transition-all duration-200 hover:scale-105 border-border/50 bg-card/50 backdrop-blur-sm"
+            className="glass gap-2 hover:shadow-xl transition-all duration-300 hover:scale-105 border-border/30 hover:border-primary/30 group"
             title="View conversation history"
           >
-            <History className="h-4 w-4" />
-            History
+            <History className="h-4 w-4 group-hover:text-primary transition-colors duration-300" />
+            <span className="group-hover:text-primary transition-colors duration-300">History</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-2xl max-h-[600px]">
@@ -153,8 +153,8 @@ export function ConversationHistory() {
             {/* New Conversation Button */}
             <Button
               onClick={handleNewConversation}
-              className="w-full gap-2"
-              variant="outline"
+              className="w-full gap-2 animated-gradient text-primary-foreground hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl"
+              variant="default"
             >
               <Plus className="h-4 w-4" />
               New Conversation
@@ -174,8 +174,10 @@ export function ConversationHistory() {
                 conversations.map((conv) => (
                   <div
                     key={conv.id}
-                    className={`p-3 rounded-lg border border-border/50 hover:bg-accent/10 hover:shadow-md transition-all duration-200 cursor-pointer ${
-                      currentConversationId === conv.id ? "bg-accent/20 shadow-md" : ""
+                    className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer group ${
+                      currentConversationId === conv.id 
+                        ? "bg-gradient-to-r from-primary/20 to-accent/20 border-primary/30 shadow-lg" 
+                        : "glass border-border/30 hover:border-primary/30 hover:shadow-lg hover:scale-[1.02]"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -183,7 +185,9 @@ export function ConversationHistory() {
                         className="flex-1 flex items-center gap-2"
                         onClick={() => handleLoad(conv.id)}
                       >
-                        <MessageSquare className="h-4 w-4 text-gray-500" />
+                        <MessageSquare className={`h-4 w-4 transition-colors duration-300 ${
+                          currentConversationId === conv.id ? "text-primary" : "text-muted-foreground group-hover:text-primary"
+                        }`} />
                         <div className="flex-1">
                           <h4 className="font-medium">{conv.title}</h4>
                           <p className="text-xs text-gray-500">
@@ -199,7 +203,7 @@ export function ConversationHistory() {
                           e.stopPropagation();
                           handleDelete(conv.id);
                         }}
-                        className="hover:bg-red-100 hover:text-red-600"
+                        className="hover:bg-destructive/10 hover:text-destructive transition-colors duration-300"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

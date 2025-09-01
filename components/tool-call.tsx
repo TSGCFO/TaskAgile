@@ -11,12 +11,12 @@ interface ToolCallProps {
 
 function ApiCallCell({ toolCall }: ToolCallProps) {
   return (
-    <div className="flex flex-col w-[70%] relative mb-[-8px]">
+    <div className="flex flex-col w-[70%] relative mb-[-8px] animate-in fade-in-0 slide-in-from-bottom-3 duration-500">
       <div>
-        <div className="flex flex-col text-sm rounded-[16px]">
-          <div className="font-semibold p-3 pl-0 text-gray-700 rounded-b-none flex gap-2">
-            <div className="flex gap-2 items-center text-blue-500 ml-[-8px]">
-              <Zap size={16} />
+        <div className="flex flex-col text-sm rounded-2xl">
+          <div className="font-semibold p-3 pl-0 text-foreground rounded-b-none flex gap-2">
+            <div className="flex gap-2 items-center text-primary ml-[-8px] group">
+              <Zap size={16} className="group-hover:scale-110 transition-transform duration-300" />
               <div className="text-sm font-medium">
                 {toolCall.status === "completed"
                   ? `Called ${toolCall.name}`
@@ -25,7 +25,7 @@ function ApiCallCell({ toolCall }: ToolCallProps) {
             </div>
           </div>
 
-          <div className="bg-[#fafafa] rounded-xl py-2 ml-4 mt-2">
+          <div className="glass rounded-2xl py-3 ml-4 mt-2 shadow-lg">
             <div className="max-h-96 overflow-y-scroll text-xs border-b mx-6 p-2">
               <SyntaxHighlighter
                 customStyle={{
@@ -70,8 +70,8 @@ function ApiCallCell({ toolCall }: ToolCallProps) {
 
 function FileSearchCell({ toolCall }: ToolCallProps) {
   return (
-    <div className="flex gap-2 items-center text-blue-500 mb-[-16px] ml-[-8px]">
-      <BookOpenText size={16} />
+    <div className="flex gap-2 items-center text-primary mb-[-16px] ml-[-8px] animate-in fade-in-0 slide-in-from-left-3 duration-500 group">
+      <BookOpenText size={16} className="group-hover:scale-110 transition-transform duration-300" />
       <div className="text-sm font-medium mb-0.5">
         {toolCall.status === "completed"
           ? "Searched files"

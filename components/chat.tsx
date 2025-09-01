@@ -47,10 +47,10 @@ const Chat: React.FC<ChatProps> = ({
   }, [items]);
 
   return (
-    <div className="flex justify-center items-center size-full bg-gradient-to-br from-background via-background to-accent/5">
-      <div className="flex grow flex-col h-full max-w-[750px] gap-2">
-        <div className="h-[90vh] overflow-y-scroll px-10 flex flex-col">
-          <div className="mt-auto space-y-6 pt-4">
+    <div className="flex justify-center items-center size-full">
+      <div className="flex grow flex-col h-full max-w-[850px] gap-4">
+        <div className="h-[85vh] overflow-y-auto px-8 flex flex-col scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+          <div className="mt-auto space-y-6 pt-6">
             {items.map((item, index) => (
               <React.Fragment key={index}>
                 {item.type === "tool_call" ? (
@@ -80,10 +80,10 @@ const Chat: React.FC<ChatProps> = ({
             <div ref={itemsEndRef} />
           </div>
         </div>
-        <div className="flex-1 p-4 px-10">
+        <div className="flex-1 p-4 px-8">
           <div className="flex items-center">
-            <div className="flex w-full items-center pb-4 md:pb-1">
-              <div className="flex w-full flex-col gap-1.5 rounded-2xl p-3 pl-2 transition-all duration-300 bg-card/80 backdrop-blur-sm border border-border shadow-lg hover:shadow-xl focus-within:shadow-xl focus-within:ring-2 focus-within:ring-primary/20">
+            <div className="flex w-full items-center pb-6">
+              <div className="glass flex w-full flex-col gap-2 rounded-3xl p-4 transition-all duration-300 shadow-2xl hover:shadow-primary/20 focus-within:shadow-primary/30 focus-within:ring-2 focus-within:ring-primary/30 glow">
                 <div className="flex items-end gap-1.5 md:gap-2 pl-4">
                   <div className="flex min-w-0 flex-1 flex-col">
                     <textarea
@@ -92,7 +92,7 @@ const Chat: React.FC<ChatProps> = ({
                       dir="auto"
                       rows={2}
                       placeholder="Type your message here..."
-                      className="mb-2 resize-none border-0 focus:outline-none text-sm bg-transparent px-0 pb-6 pt-2 placeholder:text-muted-foreground/60"
+                      className="mb-2 resize-none border-0 focus:outline-none text-base bg-transparent px-2 pb-6 pt-3 placeholder:text-muted-foreground/50 font-medium"
                       value={inputMessageText}
                       onChange={(e) => setinputMessageText(e.target.value)}
                       onKeyDown={handleKeyDown}
@@ -103,7 +103,7 @@ const Chat: React.FC<ChatProps> = ({
                   <button
                     disabled={!inputMessageText}
                     data-testid="send-button"
-                    className="flex size-8 items-end justify-center rounded-full bg-primary text-primary-foreground transition-all duration-200 hover:scale-110 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:bg-muted disabled:text-muted-foreground disabled:hover:scale-100 disabled:hover:shadow-none"
+                    className="flex size-10 items-center justify-center rounded-full animated-gradient text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:bg-muted disabled:text-muted-foreground disabled:hover:scale-100 disabled:hover:shadow-none disabled:opacity-50 pulse-animation"
                     onClick={() => {
                       onSendMessage(inputMessageText);
                       setinputMessageText("");
