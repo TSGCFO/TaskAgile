@@ -136,7 +136,8 @@ async function handleEvent(eventData: any, currentMessage: any, currentToolCalls
         const lastContent = currentMessage.content[currentMessage.content.length - 1];
         if (lastContent?.type === 'output_text') {
           lastContent.text += eventData.data.delta;
-          addChatMessage({ ...currentMessage });
+          const { updateLastAssistantMessage } = useConversationStore.getState();
+          updateLastAssistantMessage({ ...currentMessage });
         }
       }
       return { message: currentMessage, messageCreated };
