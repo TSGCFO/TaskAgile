@@ -14,13 +14,7 @@ export async function getGoogleConnectors() {
       type: "connector",
       connector: {
         type: "google_calendar",
-        name: "google_calendar",
-        container: {
-          type: "google_calendar",
-          auth: {
-            type: "oauth2"
-          }
-        }
+        name: "google_calendar"
       }
     });
 
@@ -29,13 +23,7 @@ export async function getGoogleConnectors() {
       type: "connector",
       connector: {
         type: "gmail",
-        name: "gmail",
-        container: {
-          type: "gmail",
-          auth: {
-            type: "oauth2"
-          }
-        }
+        name: "gmail"
       }
     });
   } catch (error) {

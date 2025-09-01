@@ -6,12 +6,14 @@ export async function getTools() {
   const toolsState = useToolsStore.getState();
   const tools: any[] = [];
 
-  // Built-in tools
+  // Built-in tools - OpenAI Responses API format
   if (toolsState.webSearch) {
-    tools.push({ type: "web_search" });
+    // Web search uses string format for no-config tools
+    tools.push("web_search_preview");
   }
 
   if (toolsState.fileSearch && toolsState.currentVectorStore.id) {
+    // File search needs vector_store_ids configuration
     tools.push({
       type: "file_search",
       vector_store_ids: [toolsState.currentVectorStore.id]
@@ -19,7 +21,13 @@ export async function getTools() {
   }
 
   if (toolsState.codeInterpreter) {
-    tools.push({ type: "code_interpreter" });
+    // Code interpreter needs container with auto type
+    tools.push({ 
+      type: "code_interpreter",
+      container: {
+        type: "auto"
+      }
+    });
   }
 
   // Custom function tools
