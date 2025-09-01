@@ -1,4 +1,4 @@
 {
-  "/api/turn_response/route": "app/api/turn_response/route.js",
+  "/api/google/status/route": "app/api/google/status/route.js",
   "/page": "app/page.js"
 }
