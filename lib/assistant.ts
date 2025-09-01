@@ -79,7 +79,10 @@ async function handleTurn(response: Response) {
         if (line.startsWith('data: ')) {
           try {
             const eventData = JSON.parse(line.slice(6));
-            await handleEvent(eventData, currentMessage, currentToolCalls);
+            const result = await handleEvent(eventData, currentMessage, currentToolCalls);
+            if (result) {
+              currentMessage = result;
+            }
           } catch (error) {
             console.error("Error parsing SSE data:", error);
           }
@@ -103,25 +106,58 @@ async function handleEvent(eventData: any, currentMessage: any, currentToolCalls
         content: []
       };
       addChatMessage(currentMessage);
-      break;
+      return currentMessage;
 
-    case 'response.content_part.added':
-      if (eventData.data.part?.type === 'text') {
+    case 'response.output_item.added':
+      // New text output item added
+      if (!currentMessage) {
+        currentMessage = {
+          type: "message",
+          role: "assistant",
+          content: []
+        };
+      }
+      if (eventData.data.item?.type === 'message') {
         const textPart = { type: "output_text", text: "" };
         currentMessage.content.push(textPart);
         addChatMessage({ ...currentMessage });
       }
-      break;
+      return currentMessage;
 
-    case 'response.content_part.delta':
-      if (eventData.data.delta?.text) {
+    case 'response.content_part.added':
+      // Text content part added
+      if (!currentMessage) {
+        currentMessage = {
+          type: "message",
+          role: "assistant",
+          content: []
+        };
+      }
+      const textPart = { type: "output_text", text: "" };
+      currentMessage.content.push(textPart);
+      addChatMessage({ ...currentMessage });
+      return currentMessage;
+
+    case 'response.output_text.delta':
+      // Text delta for streaming
+      if (!currentMessage) {
+        currentMessage = {
+          type: "message",
+          role: "assistant",
+          content: []
+        };
+      }
+      if (eventData.data.delta) {
+        if (currentMessage.content.length === 0) {
+          currentMessage.content.push({ type: "output_text", text: "" });
+        }
         const lastContent = currentMessage.content[currentMessage.content.length - 1];
         if (lastContent?.type === 'output_text') {
-          lastContent.text += eventData.data.delta.text;
+          lastContent.text += eventData.data.delta;
           addChatMessage({ ...currentMessage });
         }
       }
-      break;
+      return currentMessage;
 
     case 'response.function_call_delta':
       // Handle function call streaming
@@ -163,10 +199,11 @@ async function handleEvent(eventData: any, currentMessage: any, currentToolCalls
       break;
 
     case 'response.done':
+    case 'response.output_item.done':
       if (currentMessage) {
         addConversationItem(currentMessage);
       }
-      break;
+      return currentMessage;
   }
 }
 
