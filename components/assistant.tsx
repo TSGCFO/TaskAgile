@@ -73,39 +73,14 @@ export default function Assistant() {
   };
 
   return (
-    <div className="h-full w-full relative overflow-hidden">
-      {/* Animated background with multiple layers */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.15) 0%, transparent 50%),
-                          radial-gradient(circle at 80% 20%, hsl(var(--accent) / 0.15) 0%, transparent 50%),
-                          radial-gradient(circle at 40% 40%, hsl(var(--primary) / 0.1) 0%, transparent 50%)`
-        }} />
-        {/* Floating particles */}
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${i * 3}s`,
-              width: `${Math.random() * 4 + 2}px`,
-              height: `${Math.random() * 4 + 2}px`,
-              background: `hsl(var(--primary) / ${Math.random() * 0.5 + 0.3})`,
-              borderRadius: '50%',
-            }}
-          />
-        ))}
-      </div>
-      
-      {/* Content */}
-      <div className="relative z-10 h-full p-6">
-        <div className="flex justify-between items-center mb-8 px-10">
-          <div className="group">
-            <h1 className="text-5xl font-black gradient-text mb-2 hover:scale-105 transition-transform duration-300 cursor-default">
+    <div className="h-full w-full bg-background">
+      <div className="h-full max-w-7xl mx-auto px-4 py-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">
               AI Assistant
             </h1>
-            <p className="text-sm text-muted-foreground opacity-80 group-hover:opacity-100 transition-opacity duration-300">
+            <p className="text-sm text-muted-foreground mt-1">
               Powered by OpenAI Responses API
             </p>
           </div>

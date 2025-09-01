@@ -48,9 +48,9 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <div className="flex justify-center items-center size-full">
-      <div className="flex grow flex-col h-full max-w-[850px] gap-4">
-        <div className="h-[85vh] overflow-y-auto px-8 flex flex-col scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-          <div className="mt-auto space-y-6 pt-6">
+      <div className="flex grow flex-col h-full max-w-[850px]">
+        <div className="flex-1 overflow-y-auto px-4 flex flex-col">
+          <div className="mt-auto space-y-4 pt-4">
             {items.map((item, index) => (
               <React.Fragment key={index}>
                 {item.type === "tool_call" ? (
@@ -80,35 +80,34 @@ const Chat: React.FC<ChatProps> = ({
             <div ref={itemsEndRef} />
           </div>
         </div>
-        <div className="flex-1 p-4 px-8">
-          <div className="flex items-center">
-            <div className="flex w-full items-center pb-6">
-              <div className="glass flex w-full flex-col gap-2 rounded-3xl p-4 transition-all duration-300 shadow-2xl hover:shadow-primary/20 focus-within:shadow-primary/30 focus-within:ring-2 focus-within:ring-primary/30 glow">
-                <div className="flex items-end gap-1.5 md:gap-2 pl-4">
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <textarea
-                      id="prompt-textarea"
-                      tabIndex={0}
-                      dir="auto"
-                      rows={2}
-                      placeholder="Type your message here..."
-                      className="mb-2 resize-none border-0 focus:outline-none text-base bg-transparent px-2 pb-6 pt-3 placeholder:text-muted-foreground/50 font-medium"
-                      value={inputMessageText}
-                      onChange={(e) => setinputMessageText(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      onCompositionStart={() => setIsComposing(true)}
-                      onCompositionEnd={() => setIsComposing(false)}
-                    />
-                  </div>
-                  <button
-                    disabled={!inputMessageText}
-                    data-testid="send-button"
-                    className="flex size-10 items-center justify-center rounded-full animated-gradient text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:bg-muted disabled:text-muted-foreground disabled:hover:scale-100 disabled:hover:shadow-none disabled:opacity-50 pulse-animation"
-                    onClick={() => {
-                      onSendMessage(inputMessageText);
-                      setinputMessageText("");
-                    }}
-                  >
+        <div className="p-4 border-t">
+          <div className="max-w-[850px] mx-auto">
+            <div className="flex items-center bg-background rounded-lg border shadow-sm">
+              <div className="flex-1 px-4">
+                <textarea
+                  id="prompt-textarea"
+                  tabIndex={0}
+                  dir="auto"
+                  rows={2}
+                  placeholder="Type your message here..."
+                  className="w-full resize-none border-0 focus:outline-none text-base bg-transparent py-3 placeholder:text-muted-foreground"
+                  value={inputMessageText}
+                  onChange={(e) => setinputMessageText(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  onCompositionStart={() => setIsComposing(true)}
+                  onCompositionEnd={() => setIsComposing(false)}
+                />
+              </div>
+              <div className="px-3">
+                <button
+                  disabled={!inputMessageText}
+                  data-testid="send-button"
+                  className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-50"
+                  onClick={() => {
+                    onSendMessage(inputMessageText);
+                    setinputMessageText("");
+                  }}
+                >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="32"
@@ -125,7 +124,6 @@ const Chat: React.FC<ChatProps> = ({
                       />
                     </svg>
                   </button>
-                </div>
               </div>
             </div>
           </div>
