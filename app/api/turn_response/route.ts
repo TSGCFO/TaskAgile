@@ -6,6 +6,9 @@ export async function POST(request: Request) {
   try {
     const { messages, tools } = await request.json();
     
+    // Debug: Log the tools to see what's being sent
+    console.log("Received tools:", JSON.stringify(tools, null, 2));
+    
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
