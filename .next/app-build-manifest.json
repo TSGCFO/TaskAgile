@@ -30,6 +30,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/conversations/[id]/messages/route.js"
+    ],
+    "/api/turn_response/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/turn_response/route.js"
     ]
   }
 }
