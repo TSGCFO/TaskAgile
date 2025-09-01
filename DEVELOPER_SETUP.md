@@ -97,7 +97,7 @@ export default nextConfig;
 **`config/constants.ts`**:
 
 ```typescript
-export const MODEL = "gpt-4.1";
+export const MODEL = "gpt-5";
 
 export const DEVELOPER_PROMPT = `
 You are a helpful assistant helping users with their queries.

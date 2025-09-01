@@ -1,12 +1,39 @@
 "use client";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Chat from "./chat";
 import useConversationStore from "@/stores/useConversationStore";
 import { Item, processMessages } from "@/lib/assistant";
+import { ConversationHistory } from "./conversation-history";
 
 export default function Assistant() {
-  const { chatMessages, addConversationItem, addChatMessage, setAssistantLoading } =
-    useConversationStore();
+  const { 
+    chatMessages, 
+    addConversationItem, 
+    addChatMessage, 
+    setAssistantLoading,
+    saveConversation,
+    currentConversationId 
+  } = useConversationStore();
+  
+  const lastSaveTime = useRef<number>(Date.now());
+  const messageCount = useRef<number>(chatMessages.length);
+  
+  // Auto-save functionality
+  useEffect(() => {
+    const currentMessageCount = chatMessages.length;
+    
+    // Auto-save every 5 messages or every 5 minutes
+    if (currentConversationId && currentMessageCount > messageCount.current) {
+      const timeSinceLastSave = Date.now() - lastSaveTime.current;
+      const messagesSinceLastSave = currentMessageCount - messageCount.current;
+      
+      if (messagesSinceLastSave >= 5 || timeSinceLastSave > 5 * 60 * 1000) {
+        saveConversation();
+        lastSaveTime.current = Date.now();
+        messageCount.current = currentMessageCount;
+      }
+    }
+  }, [chatMessages, currentConversationId, saveConversation]);
 
   const handleSendMessage = async (message: string) => {
     if (!message.trim()) return;
@@ -50,6 +77,10 @@ export default function Assistant() {
 
   return (
     <div className="h-full p-4 w-full bg-white">
+      <div className="flex justify-between items-center mb-4 px-10">
+        <h1 className="text-xl font-semibold">AI Assistant</h1>
+        <ConversationHistory />
+      </div>
       <Chat
         items={chatMessages}
         onSendMessage={handleSendMessage}

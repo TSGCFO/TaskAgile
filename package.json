@@ -23,6 +23,7 @@
     "cmdk": "^1.0.0",
     "drizzle-kit": "^0.31.4",
     "drizzle-orm": "^0.44.5",
+    "drizzle-zod": "^0.8.3",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.22",
     "lucide-react": "^0.441.0",
