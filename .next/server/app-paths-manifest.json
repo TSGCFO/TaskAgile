@@ -1,3 +1,4 @@
 {
+  "/api/turn_response/route": "app/api/turn_response/route.js",
   "/page": "app/page.js"
 }
