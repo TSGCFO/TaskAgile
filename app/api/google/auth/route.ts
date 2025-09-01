@@ -10,7 +10,7 @@ export async function GET() {
     const code_challenge = generators.codeChallenge(code_verifier);
     
     // Store code_verifier in cookie for later use
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set("code_verifier", code_verifier, { 
       httpOnly: true, 
       secure: process.env.NODE_ENV === "production",

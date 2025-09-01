@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       return Response.redirect("/?error=missing_code");
     }
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const code_verifier = cookieStore.get("code_verifier")?.value;
     
     if (!code_verifier) {

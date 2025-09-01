@@ -39,9 +39,11 @@ export default function Assistant() {
         
         <Card className={`p-4 shadow-sm ${isUser ? 'bg-primary text-primary-foreground max-w-2xl' : 'bg-card text-card-foreground flex-1'}`}>
           {content.type === "output_text" ? (
-            <ReactMarkdown className="prose prose-sm max-w-none dark:prose-invert">
-              {content.text}
-            </ReactMarkdown>
+            <div className="prose prose-sm max-w-none dark:prose-invert">
+              <ReactMarkdown>
+                {content.text}
+              </ReactMarkdown>
+            </div>
           ) : (
             <p>{content.text}</p>
           )}

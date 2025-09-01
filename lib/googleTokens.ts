@@ -7,7 +7,7 @@ export interface GoogleTokens {
 }
 
 export async function getGoogleTokens(): Promise<GoogleTokens | null> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   
   const accessToken = cookieStore.get("gc_access_token")?.value;
   const refreshToken = cookieStore.get("gc_refresh_token")?.value;
