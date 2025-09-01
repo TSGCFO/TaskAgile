@@ -7,7 +7,8 @@ export async function POST(request: Request) {
     const { messages, tools } = await request.json();
     
     // Log tools to debug
-    console.log("Received tools:", JSON.stringify(tools, null, 2));
+    // Remove debug logging
+    // console.log("Received tools:", JSON.stringify(tools, null, 2));
     
     // Convert messages to Responses API format
     const formattedInput = messages.map((msg: any) => ({
@@ -41,10 +42,21 @@ export async function POST(request: Request) {
           }
         };
       }
+      // Function tools need name at root level
+      if (tool.type === "function" && tool.function) {
+        return {
+          type: "function",
+          name: tool.function.name,
+          function: {
+            description: tool.function.description,
+            parameters: tool.function.parameters
+          }
+        };
+      }
       return tool;
     });
 
-    console.log("Fixed tools:", JSON.stringify(fixedTools, null, 2));
+    // console.log("Fixed tools:", JSON.stringify(fixedTools, null, 2));
 
     const events = await openai.responses.create({
       model: MODEL,
