@@ -73,18 +73,22 @@ export default function Assistant() {
   };
 
   return (
-    <div className="h-full w-full bg-background">
-      <div className="h-full max-w-7xl mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">
-              AI Assistant
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Powered by OpenAI Responses API
-            </p>
+    <div className="h-full w-full bg-gradient-to-br from-purple-50 via-white to-blue-50">
+      <div className="absolute inset-0 gradient-mesh opacity-30" />
+      <div className="relative h-full max-w-7xl mx-auto px-4 py-6">
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-purple-100 p-6 mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                AI Assistant
+              </h1>
+              <p className="text-sm text-gray-600 mt-2 flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                Powered by OpenAI Responses API
+              </p>
+            </div>
+            <ConversationHistory />
           </div>
-          <ConversationHistory />
         </div>
         <Chat
           items={chatMessages}

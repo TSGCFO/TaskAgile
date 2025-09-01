@@ -100,11 +100,11 @@ export function ConversationHistory() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="gap-2 bg-white/80 backdrop-blur-sm border-purple-200 hover:bg-purple-50 hover:border-purple-400 transition-all duration-300"
             title="Save current conversation"
           >
-            <Save className="h-4 w-4" />
-            <span>Save</span>
+            <Save className="h-4 w-4 text-purple-600" />
+            <span className="text-purple-600 font-medium">Save</span>
           </Button>
         </DialogTrigger>
         <DialogContent>
@@ -137,11 +137,11 @@ export function ConversationHistory() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="gap-2 bg-white/80 backdrop-blur-sm border-purple-200 hover:bg-purple-50 hover:border-purple-400 transition-all duration-300"
             title="View conversation history"
           >
-            <History className="h-4 w-4" />
-            <span>History</span>
+            <History className="h-4 w-4 text-purple-600" />
+            <span className="text-purple-600 font-medium">History</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-2xl max-h-[600px]">
@@ -153,7 +153,7 @@ export function ConversationHistory() {
             {/* New Conversation Button */}
             <Button
               onClick={handleNewConversation}
-              className="w-full gap-2"
+              className="w-full gap-2 gradient-primary text-white hover:shadow-lg transition-all duration-300"
               variant="default"
             >
               <Plus className="h-4 w-4" />
@@ -174,10 +174,10 @@ export function ConversationHistory() {
                 conversations.map((conv) => (
                   <div
                     key={conv.id}
-                    className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
                       currentConversationId === conv.id 
-                        ? "bg-accent border-accent-foreground/20" 
-                        : "bg-card hover:bg-accent/50"
+                        ? "bg-purple-50 border-purple-400 shadow-lg" 
+                        : "bg-white border-gray-200 hover:bg-purple-50/50 hover:border-purple-300 hover:shadow-md"
                     }`}
                   >
                     <div className="flex items-center justify-between">

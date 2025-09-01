@@ -48,9 +48,9 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <div className="flex justify-center items-center size-full">
-      <div className="flex grow flex-col h-full max-w-[850px]">
-        <div className="flex-1 overflow-y-auto px-4 flex flex-col">
-          <div className="mt-auto space-y-4 pt-4">
+      <div className="flex grow flex-col h-full w-full">
+        <div className="flex-1 overflow-y-auto px-6 flex flex-col bg-white/60 backdrop-blur-sm rounded-t-2xl shadow-inner">
+          <div className="mt-auto space-y-4 pt-6 pb-4">
             {items.map((item, index) => (
               <React.Fragment key={index}>
                 {item.type === "tool_call" ? (
@@ -80,17 +80,17 @@ const Chat: React.FC<ChatProps> = ({
             <div ref={itemsEndRef} />
           </div>
         </div>
-        <div className="p-4 border-t">
+        <div className="p-6 bg-white/80 backdrop-blur-xl rounded-b-2xl shadow-xl border-t border-purple-100">
           <div className="max-w-[850px] mx-auto">
-            <div className="flex items-center bg-background rounded-lg border shadow-sm">
-              <div className="flex-1 px-4">
+            <div className="flex items-center bg-white rounded-2xl border-2 border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300 focus-within:border-purple-400">
+              <div className="flex-1 px-6">
                 <textarea
                   id="prompt-textarea"
                   tabIndex={0}
                   dir="auto"
                   rows={2}
-                  placeholder="Type your message here..."
-                  className="w-full resize-none border-0 focus:outline-none text-base bg-transparent py-3 placeholder:text-muted-foreground"
+                  placeholder="Ask me anything..."
+                  className="w-full resize-none border-0 focus:outline-none text-base bg-transparent py-4 placeholder:text-purple-300 font-medium"
                   value={inputMessageText}
                   onChange={(e) => setinputMessageText(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -98,11 +98,11 @@ const Chat: React.FC<ChatProps> = ({
                   onCompositionEnd={() => setIsComposing(false)}
                 />
               </div>
-              <div className="px-3">
+              <div className="px-4">
                 <button
                   disabled={!inputMessageText}
                   data-testid="send-button"
-                  className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-50"
+                  className="flex size-12 items-center justify-center rounded-xl gradient-primary text-white transition-all duration-300 hover:scale-110 hover:shadow-lg disabled:bg-gray-300 disabled:text-gray-500 disabled:opacity-50 disabled:hover:scale-100"
                   onClick={() => {
                     onSendMessage(inputMessageText);
                     setinputMessageText("");

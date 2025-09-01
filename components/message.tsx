@@ -8,12 +8,12 @@ interface MessageProps {
 
 const Message: React.FC<MessageProps> = ({ message }) => {
   return (
-    <div className="text-base">
+    <div className="text-base animate-in fade-in slide-in-from-bottom-2 duration-300">
       {message.role === "user" ? (
         <div className="flex justify-end">
           <div className="max-w-[75%]">
             <div className="ml-4 md:ml-24">
-              <div className="rounded-lg px-4 py-3 bg-primary text-primary-foreground shadow-sm">
+              <div className="rounded-2xl px-5 py-4 gradient-primary text-white shadow-lg hover:shadow-xl transition-all duration-300">
                 <div className="prose prose-sm prose-invert max-w-none">
                   <ReactMarkdown>
                     {message.content[0].text as string}
@@ -25,10 +25,13 @@ const Message: React.FC<MessageProps> = ({ message }) => {
         </div>
       ) : (
         <div className="flex flex-col">
-          <div className="flex">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-bold shadow-lg">
+              AI
+            </div>
             <div className="mr-4 md:mr-24 max-w-[75%]">
-              <div className="rounded-lg px-4 py-3 bg-card border shadow-sm">
-                <div className="prose prose-sm dark:prose-invert max-w-none">
+              <div className="rounded-2xl px-5 py-4 bg-white border-2 border-purple-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="prose prose-sm max-w-none">
                   <ReactMarkdown>
                     {message.content[0].text as string}
                   </ReactMarkdown>
