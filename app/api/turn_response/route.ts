@@ -6,6 +6,9 @@ export async function POST(request: Request) {
   try {
     const { messages, tools } = await request.json();
     
+    // Log tools to debug
+    console.log("Received tools:", JSON.stringify(tools, null, 2));
+    
     // Convert messages to Responses API format
     const formattedInput = messages.map((msg: any) => ({
       role: msg.role === "assistant" ? "assistant" : msg.role === "tool" ? "tool" : msg.role,
@@ -27,6 +30,22 @@ export async function POST(request: Request) {
       apiKey: process.env.OPENAI_API_KEY,
     });
 
+    // Filter and fix tools format
+    const fixedTools = tools.map((tool: any) => {
+      // Code interpreter needs specific format
+      if (tool.type === "code_interpreter") {
+        return {
+          type: "code_interpreter",
+          container: {
+            type: "auto"
+          }
+        };
+      }
+      return tool;
+    });
+
+    console.log("Fixed tools:", JSON.stringify(fixedTools, null, 2));
+
     const events = await openai.responses.create({
       model: MODEL,
       input: formattedInput,
@@ -34,7 +53,7 @@ export async function POST(request: Request) {
         format: { type: "text" },
         verbosity: "medium"
       },
-      tools: tools as any,
+      tools: fixedTools,
       stream: true,
       store: false,
     });
