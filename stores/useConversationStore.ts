@@ -99,7 +99,7 @@ const useConversationStore = create<ConversationState>((set) => ({
             }),
           });
 
-      const conversation = await response.json();
+      const conversation: { id: number } = await response.json();
 
       // Save messages if we have any (filter out non-message items)
       if (state.chatMessages.length > 0) {
