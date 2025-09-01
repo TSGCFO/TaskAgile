@@ -314,8 +314,9 @@ export const processMessages = async () => {
           toolCallMessage.call_id = item.call_id;
           setChatMessages([...chatMessages]);
         }
-        // Add all items to conversationItems (including reasoning)
-        // The API requires reasoning items when they're associated with messages
+        // Add items to conversationItems
+        // We include reasoning items here because they need to be paired with messages
+        // but they'll be filtered when saving/loading to avoid orphaned reasoning items
         if (item) {
           conversationItems.push(item);
           setConversationItems([...conversationItems]);
