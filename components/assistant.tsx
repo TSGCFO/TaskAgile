@@ -73,9 +73,11 @@ export default function Assistant() {
   };
 
   return (
-    <div className="h-full p-4 w-full bg-white">
-      <div className="flex justify-between items-center mb-4 px-10">
-        <h1 className="text-xl font-semibold">AI Assistant</h1>
+    <div className="h-full p-4 w-full bg-gradient-to-br from-background via-background to-accent/5">
+      <div className="flex justify-between items-center mb-6 px-10">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          AI Assistant
+        </h1>
         <ConversationHistory />
       </div>
       <Chat

@@ -93,14 +93,14 @@ export function ConversationHistory() {
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-3">
       {/* Save Conversation Button */}
       <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
         <DialogTrigger asChild>
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="gap-2 hover:shadow-md transition-all duration-200 hover:scale-105 border-border/50 bg-card/50 backdrop-blur-sm"
             title="Save current conversation"
           >
             <Save className="h-4 w-4" />
@@ -137,7 +137,7 @@ export function ConversationHistory() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="gap-2 hover:shadow-md transition-all duration-200 hover:scale-105 border-border/50 bg-card/50 backdrop-blur-sm"
             title="View conversation history"
           >
             <History className="h-4 w-4" />
@@ -174,8 +174,8 @@ export function ConversationHistory() {
                 conversations.map((conv) => (
                   <div
                     key={conv.id}
-                    className={`p-3 rounded-lg border hover:bg-gray-50 transition-colors cursor-pointer ${
-                      currentConversationId === conv.id ? "bg-gray-100" : ""
+                    className={`p-3 rounded-lg border border-border/50 hover:bg-accent/10 hover:shadow-md transition-all duration-200 cursor-pointer ${
+                      currentConversationId === conv.id ? "bg-accent/20 shadow-md" : ""
                     }`}
                   >
                     <div className="flex items-center justify-between">
