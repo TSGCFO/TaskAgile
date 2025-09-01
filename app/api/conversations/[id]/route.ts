@@ -10,10 +10,11 @@ const db = drizzle(client);
 // GET /api/conversations/[id] - Get a specific conversation with messages
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const conversationId = parseInt(params.id);
+    const resolvedParams = await params;
+    const conversationId = parseInt(resolvedParams.id);
     
     // Get conversation
     const [conversation] = await db
@@ -51,10 +52,11 @@ export async function GET(
 // PATCH /api/conversations/[id] - Update a conversation
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const conversationId = parseInt(params.id);
+    const resolvedParams = await params;
+    const conversationId = parseInt(resolvedParams.id);
     const body = await request.json();
     
     const [updated] = await db
@@ -86,10 +88,11 @@ export async function PATCH(
 // DELETE /api/conversations/[id] - Delete a conversation
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const conversationId = parseInt(params.id);
+    const resolvedParams = await params;
+    const conversationId = parseInt(resolvedParams.id);
     
     const [deleted] = await db
       .delete(conversations)

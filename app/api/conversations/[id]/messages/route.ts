@@ -10,10 +10,11 @@ const db = drizzle(client);
 // POST /api/conversations/[id]/messages - Add messages to a conversation
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const conversationId = parseInt(params.id);
+    const resolvedParams = await params;
+    const conversationId = parseInt(resolvedParams.id);
     const body = await request.json();
     
     // Support both single message and array of messages
