@@ -6,8 +6,22 @@ export async function POST(request: Request) {
   try {
     const { messages, tools } = await request.json();
     
-    // Debug: Log the tools to see what's being sent
-    console.log("Received tools:", JSON.stringify(tools, null, 2));
+    // Convert messages to Responses API format
+    const formattedInput = messages.map((msg: any) => ({
+      role: msg.role === "assistant" ? "assistant" : msg.role === "tool" ? "tool" : msg.role,
+      content: msg.content
+    }));
+    
+    // Add developer instructions as the first message
+    formattedInput.unshift({
+      role: "developer",
+      content: [
+        {
+          type: "input_text",
+          text: getDeveloperPrompt()
+        }
+      ]
+    });
     
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
@@ -15,11 +29,14 @@ export async function POST(request: Request) {
 
     const events = await openai.responses.create({
       model: MODEL,
-      input: messages,
-      instructions: getDeveloperPrompt(),
+      input: formattedInput,
+      text: {
+        format: { type: "text" },
+        verbosity: "medium"
+      },
       tools: tools as any,
       stream: true,
-      parallel_tool_calls: false,
+      store: false,
     });
 
     const stream = new ReadableStream({

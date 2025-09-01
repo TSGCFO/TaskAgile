@@ -9,22 +9,22 @@ export async function getGoogleConnectors() {
       return connectors;
     }
 
-    // Add Google Calendar connector
+    // Add Google Calendar MCP connector
     connectors.push({
-      type: "connector",
-      connector: {
-        type: "google_calendar",
-        name: "google_calendar"
-      }
+      type: "mcp",
+      server_label: "google_calendar",
+      server_url: "google_calendar",
+      require_approval: "never",
+      allowed_tools: ["*"]
     });
 
-    // Add Gmail connector  
+    // Add Gmail MCP connector  
     connectors.push({
-      type: "connector",
-      connector: {
-        type: "gmail",
-        name: "gmail"
-      }
+      type: "mcp",
+      server_label: "gmail",
+      server_url: "gmail",
+      require_approval: "never",
+      allowed_tools: ["*"]
     });
   } catch (error) {
     console.error("Error getting Google connectors:", error);

@@ -8,12 +8,23 @@ export async function getTools() {
 
   // Built-in tools - OpenAI Responses API format
   if (toolsState.webSearch) {
-    // Web search uses string format for no-config tools
-    tools.push("web_search_preview");
+    // Web search with configuration
+    tools.push({
+      type: "web_search",
+      filters: null,
+      search_context_size: "medium",
+      user_location: {
+        type: "approximate",
+        city: null,
+        country: null,
+        region: null,
+        timezone: null
+      }
+    });
   }
 
   if (toolsState.fileSearch && toolsState.currentVectorStore.id) {
-    // File search needs vector_store_ids configuration
+    // File search with vector store
     tools.push({
       type: "file_search",
       vector_store_ids: [toolsState.currentVectorStore.id]
@@ -21,12 +32,9 @@ export async function getTools() {
   }
 
   if (toolsState.codeInterpreter) {
-    // Code interpreter needs container with auto type
+    // Code interpreter
     tools.push({ 
-      type: "code_interpreter",
-      container: {
-        type: "auto"
-      }
+      type: "code_interpreter"
     });
   }
 
