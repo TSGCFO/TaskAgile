@@ -146,7 +146,27 @@ export const processMessages = async () => {
   } = useConversationStore.getState();
 
   const tools = getTools();
-  const allConversationItems = conversationItems;
+  // Filter out orphaned reasoning items that don't have a following message
+  // to prevent "reasoning item without required following item" error
+  const filteredConversationItems = [];
+  for (let i = 0; i < conversationItems.length; i++) {
+    const item = conversationItems[i];
+    
+    // If it's a reasoning item, check if it has a following message item
+    if (item.type === 'reasoning') {
+      const nextItem = conversationItems[i + 1];
+      // Only include reasoning items that have a following message item
+      if (nextItem && nextItem.type === 'message') {
+        filteredConversationItems.push(item);
+      }
+      // Skip orphaned reasoning items
+    } else {
+      // Include all non-reasoning items
+      filteredConversationItems.push(item);
+    }
+  }
+  
+  const allConversationItems = filteredConversationItems;
 
   let assistantMessageContent = "";
   let functionArguments = "";
