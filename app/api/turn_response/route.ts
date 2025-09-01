@@ -72,15 +72,35 @@ export async function POST(request: Request) {
 
     const stream = new ReadableStream({
       async start(controller) {
+        let closed = false;
+        
         try {
           for await (const event of events) {
-            const data = JSON.stringify({ event: event.type, data: event });
-            controller.enqueue(`data: ${data}\n\n`);
+            // Check if controller is still open before enqueuing
+            if (closed) break;
+            
+            try {
+              const data = JSON.stringify({ event: event.type, data: event });
+              controller.enqueue(`data: ${data}\n\n`);
+            } catch (error) {
+              // Controller might have been closed by the client
+              if (error instanceof TypeError && error.message.includes('Controller is already closed')) {
+                closed = true;
+                break;
+              }
+              throw error;
+            }
           }
-          controller.close();
+          
+          // Only close if not already closed
+          if (!closed) {
+            controller.close();
+          }
         } catch (error) {
           console.error("Error in streaming loop:", error);
-          controller.error(error);
+          if (!closed) {
+            controller.error(error);
+          }
         }
       },
     });
