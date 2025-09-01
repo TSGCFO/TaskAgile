@@ -1,106 +1,108 @@
-# Overview
+# Replit.md
 
-This is a full-stack TypeScript application that demonstrates an AI-powered chat interface using the OpenAI Responses API with streaming and tool calling capabilities. The application is built with Express.js backend and React frontend, utilizing shadcn/ui components for the user interface. It provides a comprehensive chat experience with customizable tools, file uploads, vector search, and optional Google service integrations.
+This file provides guidance to Replit Agent when working with code in this repository.
 
-# User Preferences
+## Development Commands
 
-Preferred communication style: Simple, everyday language.
+- **Start development server**: `npm run dev` (runs on <http://localhost:3000>)
+- **Build for production**: `npm run build`
+- **Start production server**: `npm start`
+- **Lint code**: `npm run lint`
+- **Install dependencies**: `npm install`
 
-# System Architecture
+## Architecture Overview
 
-## Frontend Architecture
+This is a Next.js 15 (App Router) TypeScript application that demonstrates the OpenAI Responses API with streaming and tool calling capabilities. The app provides a chat interface with multi-turn conversation handling.
 
-The frontend is built using React with TypeScript and modern tooling:
+### Core Flow
 
-- **Component Library**: Shadcn/ui components built on top of Radix UI primitives
-- **Styling**: Tailwind CSS with custom CSS variables for theming
-- **State Management**: Zustand for client-side state management with persistence
-- **Build Tool**: Vite for development and build processes
-- **Routing**: Wouter for lightweight client-side routing
+1. UI builds tool list from user toggles in `useToolsStore`
+2. Chat submission triggers `processMessages` in `lib/assistant.ts`, which calls `/api/turn_response`
+3. API route assembles OpenAI request, conditionally injects Google MCP connectors, streams SSE events
+4. Client `handleTurn` parses SSE events, updates chat state, and triggers local function execution
+5. Tool outputs are appended and may trigger follow-up turns
 
-The frontend follows a component-driven architecture with clear separation between UI components, business logic, and state management. Components are organized in a hierarchical structure with reusable UI components in the `/components/ui` directory.
+### Key Directories & Files
 
-## Backend Architecture
+#### Configuration
 
-The backend uses Express.js with TypeScript:
+- `config/constants.ts`: Model name and dynamic developer prompt with date injection
+- `config/tools-list.ts`: Declarative function tool schemas (must match `config/functions.ts`)
+- `config/functions.ts`: Browser-side function wrappers that fetch internal API endpoints
 
-- **Server Framework**: Express.js with middleware for JSON parsing and CORS
-- **API Structure**: RESTful API endpoints organized under `/api` routes
-- **File Organization**: Modular route handlers with separate concerns for different functionalities
-- **Development**: Hot reloading with tsx and custom error handling
+#### Core Logic
 
-The backend follows a clean separation of concerns with dedicated route handlers for different features like OpenAI integration, Google services, and file management.
+- `lib/assistant.ts`: Streaming event state machine and message processing
+- `lib/tools/tools.ts`: Composes tools array from Zustand state
+- `lib/tools/connectors.ts`: Google MCP connector helpers
 
-## Data Storage Solutions
+#### State Management
 
-The application uses multiple storage strategies:
+- `stores/useConversationStore.ts`: Chat messages and conversation items
+- `stores/useToolsStore.ts`: Tool configuration and settings
 
-- **Database**: PostgreSQL with Drizzle ORM for schema management and migrations
-- **Session Storage**: Zustand with localStorage persistence for client-side state
-- **File Storage**: OpenAI's vector stores for document storage and search
-- **Authentication**: Cookie-based session management for Google OAuth
+#### API Routes
 
-## Authentication and Authorization
+- `app/api/turn_response/route.ts`: Main endpoint for OpenAI Responses API calls
+- `app/api/functions/*`: Server-side function implementations
+- `app/api/vector_stores/*`: Vector store CRUD operations
+- `app/api/google/*`: Google OAuth flow handlers
 
-Authentication is implemented through multiple mechanisms:
+#### UI Components
 
-- **Google OAuth**: OpenID Connect flow for Google Calendar and Gmail integration
-- **API Key Authentication**: OpenAI API key for AI service access
-- **Cookie-based Sessions**: Secure cookie storage for maintaining user sessions
-- **Token Management**: Automatic refresh token handling for Google services
+- `components/assistant.tsx`: Main chat interface
+- `components/tool-call.tsx`: Tool execution progress display
+- `components/tools-panel.tsx`: Tool configuration panel
 
-## Tool System Architecture
+## Tool Integration Patterns
 
-The application features a flexible tool system:
+### Adding New Function Tools
 
-- **Built-in Tools**: Web search, file search, and code interpreter tools
-- **Custom Functions**: Weather API and joke generator with extensible function mapping
-- **Google Connectors**: Calendar and Gmail integration through MCP (Model Context Protocol)
-- **Dynamic Tool Loading**: Runtime tool configuration based on user preferences
+1. Add schema to `config/tools-list.ts`
+2. Create API route under `app/api/functions/<name>/route.ts`
+3. Add client wrapper to `config/functions.ts` and export in `functionsMap`
+4. Both schema and function must use identical parameter names
 
-## Streaming and Real-time Features
+### Tool Types Supported
 
-Real-time communication is handled through:
+- **Web Search**: Built-in OpenAI tool with optional location configuration
+- **File Search**: Uses vector stores for document search
+- **Code Interpreter**: Python code execution
+- **Function Calls**: Custom functions defined in this codebase
+- **MCP**: Model Context Protocol connectors (currently Google Calendar/Gmail)
 
-- **Server-Sent Events (SSE)**: Streaming responses from OpenAI API
-- **Event Processing**: Client-side event handling for different response types
-- **Progress Tracking**: Real-time tool execution progress and status updates
-- **Async Processing**: Non-blocking tool execution with status management
+## State Management Rules
 
-# External Dependencies
+- Use immutable updates with spread operators for Zustand stores
+- `conversationItems` contains only items sent to OpenAI API
+- `chatMessages` contains all UI display items including partial streaming states
+- Function tools trigger recursive `processMessages()` calls after completion
 
-## AI Services
-- **OpenAI API**: Core AI functionality with GPT-4 model integration for chat responses and tool calling
-- **OpenAI Vector Stores**: Document storage and semantic search capabilities
+## Google Integration
 
-## Database and ORM
-- **PostgreSQL**: Primary database (configured but may need to be added)
-- **Drizzle ORM**: Type-safe database operations and schema management
-- **Neon Database**: Serverless PostgreSQL provider for cloud deployment
+Requires OAuth setup with Google Cloud Console:
 
-## Google Services Integration
-- **Google OAuth**: OpenID Connect client for authentication
-- **Google Calendar API**: Calendar event access and management
-- **Gmail API**: Email search and management capabilities
+- Enable Google Calendar API and Gmail API
+- Configure OAuth client with redirect URI: `http://localhost:3000/api/google/callback`
+- Set environment variables: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
 
-## External APIs
-- **OpenStreetMap Nominatim**: Geocoding service for location-based weather queries
-- **Open-Meteo**: Weather data API for current conditions and forecasts
+## Environment Variables
 
-## UI and Styling
-- **Radix UI**: Accessible component primitives for complex UI elements
-- **Tailwind CSS**: Utility-first CSS framework with custom theming
-- **Lucide React**: Icon library for consistent iconography
+Required:
 
-## Development and Build Tools
-- **Replit Integration**: Runtime error modal and cartographer for development
-- **TypeScript**: Static typing throughout the application
-- **ESBuild**: Fast bundling for production builds
-- **PostCSS**: CSS processing with Tailwind and Autoprefixer
+- `OPENAI_API_KEY`: OpenAI API access
 
-## Additional Libraries
-- **React Query**: Server state management and caching
-- **React Markdown**: Markdown rendering for chat messages
-- **React Dropzone**: File upload interface for vector store management
-- **Recharts**: Chart components for data visualization
-- **XY Flow**: Flow diagram components for complex visualizations
+Optional:
+
+- `GOOGLE_CLIENT_ID`: Google OAuth client ID
+- `GOOGLE_CLIENT_SECRET`: Google OAuth client secret
+- `GOOGLE_REDIRECT_URI`: OAuth redirect URI (defaults to localhost:3000)
+
+## Dependencies
+
+- **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS, Radix UI
+- **State**: Zustand for state management
+- **OpenAI**: `openai` SDK for Responses API
+- **Auth**: `openid-client` for Google OAuth
+- **Streaming**: Native ReadableStream with manual SSE formatting
+- **JSON Parsing**: `partial-json` for streaming argument parsing

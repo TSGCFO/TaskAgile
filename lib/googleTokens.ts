@@ -1,54 +1,66 @@
 import { cookies } from "next/headers";
+import { getSessionId, getTokenSet, saveTokenSet } from "@/lib/session";
+import { getGoogleClient } from "@/lib/googleClient";
+import { refreshTokenGrant } from "openid-client";
 
-export interface GoogleTokens {
-  access_token: string;
-  refresh_token?: string;
-  expires_at?: number;
-}
+export type FreshTokens = {
+  accessToken?: string;
+  refreshToken?: string;
+  expiresAt?: number;
+};
 
-export async function getGoogleTokens(): Promise<GoogleTokens | null> {
-  const cookieStore = await cookies();
-  
-  const accessToken = cookieStore.get("gc_access_token")?.value;
-  const refreshToken = cookieStore.get("gc_refresh_token")?.value;
-  const expiresAt = cookieStore.get("gc_expires_at")?.value;
-  
-  if (!accessToken) {
-    return null;
-  }
+// Refresh when close to expiry (30s) or when missing access token but we have a refresh token
+const EXPIRY_SKEW_MS = 30_000;
 
-  return {
-    access_token: accessToken,
-    refresh_token: refreshToken,
-    expires_at: expiresAt ? parseInt(expiresAt) : undefined,
-  };
-}
+export async function getFreshAccessToken(): Promise<FreshTokens> {
+  const jar = await cookies();
+  const sessionId = await getSessionId();
+  const tokenSet = getTokenSet(sessionId);
 
-export async function refreshGoogleTokens(refreshToken: string): Promise<GoogleTokens | null> {
-  try {
-    const response = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-        refresh_token: refreshToken,
-        grant_type: "refresh_token",
-      }),
-    });
+  let accessToken = jar.get("gc_access_token")?.value || tokenSet?.access_token;
+  let refreshToken = jar.get("gc_refresh_token")?.value || tokenSet?.refresh_token;
+  const expiresAtStr =
+    jar.get("gc_expires_at")?.value ||
+    (tokenSet?.expires_at != null ? String(tokenSet.expires_at) : undefined);
+  let expiresAt = expiresAtStr ? Number(expiresAtStr) : undefined;
 
-    if (!response.ok) {
-      throw new Error("Failed to refresh token");
+  const now = Date.now();
+  const isExpiringSoon = expiresAt != null && now > expiresAt - EXPIRY_SKEW_MS;
+  const shouldRefresh = Boolean(refreshToken && (!accessToken || isExpiringSoon));
+
+  if (shouldRefresh) {
+    try {
+      const config = await getGoogleClient();
+      const refreshed = await refreshTokenGrant(config, refreshToken!);
+      accessToken = refreshed.access_token || accessToken;
+      refreshToken = refreshed.refresh_token || refreshToken;
+      expiresAt =
+        refreshed.expires_in != null ? now + refreshed.expires_in * 1000 : expiresAt;
+
+      // Persist refreshed tokens
+      const cookieOptions = {
+        httpOnly: true as const,
+        sameSite: "lax" as const,
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24 * 7,
+      };
+      if (accessToken) jar.set("gc_access_token", accessToken, cookieOptions);
+      if (refreshToken) jar.set("gc_refresh_token", refreshToken, cookieOptions);
+      if (expiresAt) jar.set("gc_expires_at", String(expiresAt), cookieOptions);
+      if (sessionId) {
+        const existing = tokenSet || {};
+        saveTokenSet(sessionId, {
+          ...existing,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          expires_at: expiresAt,
+        });
+      }
+    } catch {
+      // If refresh fails, fall through and return whatever we have
     }
-
-    const tokens = await response.json();
-    return {
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token || refreshToken,
-      expires_at: Date.now() + (tokens.expires_in * 1000),
-    };
-  } catch (error) {
-    console.error("Error refreshing Google tokens:", error);
-    return null;
   }
+
+  return { accessToken, refreshToken, expiresAt };
 }

@@ -1,14 +1,19 @@
-import { getGoogleTokens } from "@/lib/googleTokens";
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { getSessionId, getTokenSet } from "@/lib/session";
 
 export async function GET() {
-  try {
-    const tokens = await getGoogleTokens();
-    
-    return Response.json({
-      connected: !!tokens?.access_token,
-    });
-  } catch (error) {
-    console.error("Google status error:", error);
-    return Response.json({ connected: false });
-  }
+  const sessionId = await getSessionId();
+  const tokenSet = getTokenSet(sessionId);
+  const jar = await cookies();
+  const accessToken = jar.get("gc_access_token")?.value;
+  const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env as Record<
+    string,
+    string | undefined
+  >;
+  const oauthConfigured = Boolean(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET);
+  return NextResponse.json({
+    connected: Boolean(tokenSet || accessToken),
+    oauthConfigured,
+  });
 }

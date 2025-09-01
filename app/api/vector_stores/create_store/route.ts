@@ -1,33 +1,16 @@
 import OpenAI from "openai";
-import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest) {
+const openai = new OpenAI();
+
+export async function POST(request: Request) {
+  const { name } = await request.json();
   try {
-    const { name } = await request.json();
-    
-    if (!name) {
-      return Response.json({ error: "Store name is required" }, { status: 400 });
-    }
-
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+    const vectorStore = await openai.vectorStores.create({
+      name,
     });
-
-    const vectorStore = await openai.beta.vectorStores.create({
-      name: name,
-    });
-
-    return Response.json({
-      id: vectorStore.id,
-      name: vectorStore.name,
-      status: vectorStore.status,
-      file_counts: vectorStore.file_counts,
-    });
+    return new Response(JSON.stringify(vectorStore), { status: 200 });
   } catch (error) {
-    console.error("Vector store creation error:", error);
-    return Response.json(
-      { error: "Failed to create vector store" }, 
-      { status: 500 }
-    );
+    console.error("Error creating vector store:", error);
+    return new Response("Error creating vector store", { status: 500 });
   }
 }

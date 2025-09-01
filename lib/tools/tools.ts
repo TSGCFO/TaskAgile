@@ -1,78 +1,82 @@
+import { toolsList } from "../../config/tools-list";
 import useToolsStore from "@/stores/useToolsStore";
-import { toolsList } from "@/config/tools-list";
-import { getGoogleConnectors } from "./connectors";
+import { WebSearchConfig } from "@/stores/useToolsStore";
 
-export async function getTools() {
-  const toolsState = useToolsStore.getState();
+interface WebSearchTool extends WebSearchConfig {
+  type: "web_search";
+}
+export const getTools = () => {
+  const state = useToolsStore.getState();
   const tools: any[] = [];
 
-  // Built-in tools - OpenAI Responses API format
-  if (toolsState.webSearch) {
-    // Web search with configuration
-    tools.push({
-      type: "web_search",
-      filters: null,
-      search_context_size: "medium",
-      user_location: {
-        type: "approximate",
-        city: null,
-        country: null,
-        region: null,
-        timezone: null
-      }
-    });
-  }
+  const addWebSearch = () => {
+    if (!state.webSearchEnabled) return;
+    const loc = state.webSearchConfig.user_location;
+    const hasLocation = !!(
+      loc && (loc.country || loc.region || loc.city)
+    );
+    const tool: WebSearchTool = { type: "web_search" };
+    if (hasLocation && loc) tool.user_location = loc;
+    tools.push(tool);
+  };
 
-  if (toolsState.fileSearch && toolsState.currentVectorStore.id) {
-    // File search with vector store
-    tools.push({
-      type: "file_search",
-      vector_store_ids: [toolsState.currentVectorStore.id]
-    });
-  }
+  const addFileSearch = () => {
+    if (!state.fileSearchEnabled) return;
+    tools.push({ type: "file_search", vector_store_ids: [state.vectorStore?.id] });
+  };
 
-  if (toolsState.codeInterpreter) {
-    // Code interpreter
-    tools.push({ 
-      type: "code_interpreter"
-    });
-  }
-
-  // Custom function tools
-  if (toolsState.functions) {
-    const enabledFunctions = [];
-    
-    if (toolsState.weather) {
-      enabledFunctions.push(toolsList.find(t => t.name === "get_weather"));
+  const addCodeInterpreter = () => {
+    if (state.codeInterpreterEnabled) {
+      tools.push({ type: "code_interpreter", container: { type: "auto" } });
     }
-    
-    if (toolsState.jokes) {
-      enabledFunctions.push(toolsList.find(t => t.name === "get_joke"));
+  };
+
+  const addFunctions = () => {
+    if (!state.functionsEnabled) return;
+    tools.push(
+      ...toolsList.map((tool) => ({
+        type: "function",
+        name: tool.name,
+        description: tool.description,
+        parameters: {
+          type: "object",
+          properties: { ...tool.parameters },
+          required: Object.keys(tool.parameters),
+          additionalProperties: false,
+        },
+        strict: true,
+      }))
+    );
+  };
+
+  const addMcp = () => {
+    const cfg = state.mcpConfig;
+    if (!(state.mcpEnabled && cfg.server_url && cfg.server_label)) return;
+    const mcpTool: any = {
+      type: "mcp",
+      server_label: cfg.server_label,
+      server_url: cfg.server_url,
+    };
+    if (cfg.skip_approval) mcpTool.require_approval = "never";
+    if (cfg.allowed_tools.trim()) {
+      mcpTool.allowed_tools = cfg.allowed_tools
+        .split(",")
+        .map((t) => t.trim())
+        .filter((t) => t);
     }
+    const token = cfg.mcpAuthToken?.trim();
+    if (token) {
+      mcpTool.headers = { Authorization: `Bearer ${token}` };
+    }
+    tools.push(mcpTool);
+  };
 
-    enabledFunctions.forEach(func => {
-      if (func) {
-        tools.push({
-          type: "function",
-          function: {
-            name: func.name,
-            description: func.description,
-            parameters: {
-              type: "object",
-              properties: func.parameters,
-              required: Object.keys(func.parameters)
-            }
-          }
-        });
-      }
-    });
-  }
+  addWebSearch();
+  addFileSearch();
+  addCodeInterpreter();
+  addFunctions();
+  addMcp();
 
-  // Google connectors
-  if (toolsState.googleCalendar || toolsState.googleGmail) {
-    const googleConnectors = await getGoogleConnectors();
-    tools.push(...googleConnectors);
-  }
-
+  console.log("tools", tools);
   return tools;
-}
+};

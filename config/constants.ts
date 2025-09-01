@@ -1,5 +1,6 @@
-export const MODEL = "gpt-5"; // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+export const MODEL = "gpt-4.1";
 
+// Developer prompt for the assistant
 export const DEVELOPER_PROMPT = `
 You are a helpful assistant helping users with their queries.
 If they need up to date information, you can use the web search tool to search the web for relevant information.
@@ -22,6 +23,15 @@ export function getDeveloperPrompt(): string {
   return `${DEVELOPER_PROMPT.trim()}\n\nToday is ${dayName}, ${monthName} ${dayOfMonth}, ${year}.`;
 }
 
-export const INITIAL_MESSAGE = `Hi, how can I help you?`;
+// Here is the context that you have available to you:
+// ${context}
 
-export const defaultVectorStore = { id: "", name: "Example Store" };
+// Initial message that will be displayed in the chat
+export const INITIAL_MESSAGE = `
+Hi, how can I help you?
+`;
+
+export const defaultVectorStore = {
+  id: "",
+  name: "Example",
+};

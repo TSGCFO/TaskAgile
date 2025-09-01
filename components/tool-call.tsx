@@ -1,114 +1,238 @@
-"use client";
+import React from "react";
 
-import { Badge } from "./ui/badge";
-import { Card } from "./ui/card";
-import { Progress } from "./ui/progress";
+import { ToolCallItem } from "@/lib/assistant";
+import { BookOpenText, Clock, Globe, Zap, Code2, Download } from "lucide-react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { coy } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface ToolCallProps {
-  toolCall: {
-    id: string;
-    name: string;
-    status: "executing" | "completed" | "error" | "queued";
-    progress: number;
-    result?: any;
-    error?: string;
-  };
+  toolCall: ToolCallItem;
+}
+
+function ApiCallCell({ toolCall }: ToolCallProps) {
+  return (
+    <div className="flex flex-col w-[70%] relative mb-[-8px]">
+      <div>
+        <div className="flex flex-col text-sm rounded-[16px]">
+          <div className="font-semibold p-3 pl-0 text-gray-700 rounded-b-none flex gap-2">
+            <div className="flex gap-2 items-center text-blue-500 ml-[-8px]">
+              <Zap size={16} />
+              <div className="text-sm font-medium">
+                {toolCall.status === "completed"
+                  ? `Called ${toolCall.name}`
+                  : `Calling ${toolCall.name}...`}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-[#fafafa] rounded-xl py-2 ml-4 mt-2">
+            <div className="max-h-96 overflow-y-scroll text-xs border-b mx-6 p-2">
+              <SyntaxHighlighter
+                customStyle={{
+                  backgroundColor: "#fafafa",
+                  padding: "8px",
+                  paddingLeft: "0px",
+                  marginTop: 0,
+                  marginBottom: 0,
+                }}
+                language="json"
+                style={coy}
+              >
+                {JSON.stringify(toolCall.parsedArguments, null, 2)}
+              </SyntaxHighlighter>
+            </div>
+            <div className="max-h-96 overflow-y-scroll mx-6 p-2 text-xs">
+              {toolCall.output ? (
+                <SyntaxHighlighter
+                  customStyle={{
+                    backgroundColor: "#fafafa",
+                    padding: "8px",
+                    paddingLeft: "0px",
+                    marginTop: 0,
+                  }}
+                  language="json"
+                  style={coy}
+                >
+                  {JSON.stringify(JSON.parse(toolCall.output), null, 2)}
+                </SyntaxHighlighter>
+              ) : (
+                <div className="text-zinc-500 flex items-center gap-2 py-2">
+                  <Clock size={16} /> Waiting for result...
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FileSearchCell({ toolCall }: ToolCallProps) {
+  return (
+    <div className="flex gap-2 items-center text-blue-500 mb-[-16px] ml-[-8px]">
+      <BookOpenText size={16} />
+      <div className="text-sm font-medium mb-0.5">
+        {toolCall.status === "completed"
+          ? "Searched files"
+          : "Searching files..."}
+      </div>
+    </div>
+  );
+}
+
+function WebSearchCell({ toolCall }: ToolCallProps) {
+  return (
+    <div className="flex gap-2 items-center text-blue-500 mb-[-16px] ml-[-8px]">
+      <Globe size={16} />
+      <div className="text-sm font-medium">
+        {toolCall.status === "completed"
+          ? "Searched the web"
+          : "Searching the web..."}
+      </div>
+    </div>
+  );
+}
+
+function McpCallCell({ toolCall }: ToolCallProps) {
+  return (
+    <div className="flex flex-col w-[70%] relative mb-[-8px]">
+      <div>
+        <div className="flex flex-col text-sm rounded-[16px]">
+          <div className="font-semibold p-3 pl-0 text-gray-700 rounded-b-none flex gap-2">
+            <div className="flex gap-2 items-center text-blue-500 ml-[-8px]">
+              <Zap size={16} />
+              <div className="text-sm font-medium">
+                {toolCall.status === "completed"
+                  ? `Called ${toolCall.name} via MCP tool`
+                  : `Calling ${toolCall.name} via MCP tool...`}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-[#fafafa] rounded-xl py-2 ml-4 mt-2">
+            <div className="max-h-96 overflow-y-scroll text-xs border-b mx-6 p-2">
+              <SyntaxHighlighter
+                customStyle={{
+                  backgroundColor: "#fafafa",
+                  padding: "8px",
+                  paddingLeft: "0px",
+                  marginTop: 0,
+                  marginBottom: 0,
+                }}
+                language="json"
+                style={coy}
+              >
+                {JSON.stringify(toolCall.parsedArguments, null, 2)}
+              </SyntaxHighlighter>
+            </div>
+            <div className="max-h-96 overflow-y-scroll mx-6 p-2 text-xs">
+              {toolCall.output ? (
+                <SyntaxHighlighter
+                  customStyle={{
+                    backgroundColor: "#fafafa",
+                    padding: "8px",
+                    paddingLeft: "0px",
+                    marginTop: 0,
+                  }}
+                  language="json"
+                  style={coy}
+                >
+                  {(() => {
+                    try {
+                      const parsed = JSON.parse(toolCall.output!);
+                      return JSON.stringify(parsed, null, 2);
+                    } catch {
+                      return toolCall.output!;
+                    }
+                  })()}
+                </SyntaxHighlighter>
+              ) : (
+                <div className="text-zinc-500 flex items-center gap-2 py-2">
+                  <Clock size={16} /> Waiting for result...
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CodeInterpreterCell({ toolCall }: ToolCallProps) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div className="flex flex-col w-[70%] relative mb-[-8px]">
+      <div className="flex flex-col text-sm rounded-[16px]">
+        <div className="font-semibold p-3 pl-0 text-gray-700 rounded-b-none flex gap-2">
+          <div
+            className="flex gap-2 items-center text-blue-500 ml-[-8px] cursor-pointer"
+            onClick={() => setOpen(!open)}
+          >
+            <Code2 size={16} />
+            <div className="text-sm font-medium">
+              {toolCall.status === "completed"
+                ? "Code executed"
+                : "Running code interpreter..."}
+            </div>
+          </div>
+        </div>
+        <div className="bg-[#fafafa] rounded-xl py-2 ml-4 mt-2">
+          <div className="mx-6 p-2 text-xs">
+            <SyntaxHighlighter
+              customStyle={{
+                backgroundColor: "#fafafa",
+                padding: "8px",
+                paddingLeft: "0px",
+                marginTop: 0,
+              }}
+              language="python"
+              style={coy}
+            >
+              {toolCall.code || ""}
+            </SyntaxHighlighter>
+          </div>
+        </div>
+        {toolCall.files && toolCall.files.length > 0 && (
+          <div className="flex gap-2 mt-2 ml-4 flex-wrap">
+            {toolCall.files.map((f) => (
+              <a
+                key={f.file_id}
+                href={`/api/container_files/content?file_id=${f.file_id}${f.container_id ? `&container_id=${f.container_id}` : ""}${f.filename ? `&filename=${encodeURIComponent(f.filename)}` : ""}`}
+                download
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#ededed] text-xs text-zinc-500"
+              >
+                {f.filename || f.file_id}
+                <Download size={12} />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function ToolCall({ toolCall }: ToolCallProps) {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "executing":
-        return "bg-accent/10 text-accent";
-      case "completed":
-        return "bg-accent/10 text-accent";
-      case "error":
-        return "bg-destructive/10 text-destructive";
-      case "queued":
-        return "bg-muted text-muted-foreground";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
-  const getIcon = (name: string) => {
-    switch (name) {
-      case "get_weather":
-        return "fas fa-cloud-sun";
-      case "get_joke":
-        return "fas fa-laugh";
-      default:
-        return "fas fa-cog";
-    }
-  };
-
   return (
-    <div className="flex items-start space-x-4 animate-slide-up">
-      <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-        <i className="fas fa-robot text-primary-foreground text-sm"></i>
-      </div>
-      <div className="flex-1 space-y-3">
-        {/* Tool Call Progress */}
-        <Card className="p-4 shadow-sm border border-border">
-          <div className="flex items-center space-x-3 mb-3">
-            <i className={`${getIcon(toolCall.name)} text-primary`}></i>
-            <span className="font-medium text-foreground">{toolCall.name.replace('_', ' ')}</span>
-            <div className="flex-1 flex justify-end">
-              <Badge className={getStatusColor(toolCall.status)}>
-                {toolCall.status === "executing" && (
-                  <span className="w-2 h-2 bg-accent rounded-full mr-2 animate-pulse"></span>
-                )}
-                {toolCall.status === "completed" && (
-                  <i className="fas fa-check mr-2 text-sm"></i>
-                )}
-                {toolCall.status === "error" && (
-                  <i className="fas fa-times mr-2 text-sm"></i>
-                )}
-                {toolCall.status.charAt(0).toUpperCase() + toolCall.status.slice(1)}
-              </Badge>
-            </div>
-          </div>
-          <Progress 
-            value={toolCall.progress} 
-            className="w-full h-2"
-            data-testid={`progress-${toolCall.id}`}
-          />
-        </Card>
-
-        {/* Tool Result */}
-        {toolCall.status === "completed" && toolCall.result && (
-          <Card className="bg-secondary/30 p-4 border-l-4 border-accent">
-            <div className="flex items-center space-x-2 mb-2">
-              <i className="fas fa-check text-accent text-sm"></i>
-              <span className="text-sm font-medium text-accent">
-                {toolCall.name.replace('_', ' ')} Result
-              </span>
-            </div>
-            <div className="text-sm text-muted-foreground" data-testid={`result-${toolCall.id}`}>
-              {typeof toolCall.result === 'object' ? (
-                <pre className="whitespace-pre-wrap font-mono text-xs">
-                  {JSON.stringify(toolCall.result, null, 2)}
-                </pre>
-              ) : (
-                toolCall.result.toString()
-              )}
-            </div>
-          </Card>
-        )}
-
-        {/* Tool Error */}
-        {toolCall.status === "error" && toolCall.error && (
-          <Card className="bg-destructive/10 p-4 border-l-4 border-destructive">
-            <div className="flex items-center space-x-2 mb-2">
-              <i className="fas fa-exclamation-triangle text-destructive text-sm"></i>
-              <span className="text-sm font-medium text-destructive">Error</span>
-            </div>
-            <div className="text-sm text-muted-foreground" data-testid={`error-${toolCall.id}`}>
-              {toolCall.error}
-            </div>
-          </Card>
-        )}
-      </div>
+    <div className="flex justify-start pt-2">
+      {(() => {
+        switch (toolCall.tool_type) {
+          case "function_call":
+            return <ApiCallCell toolCall={toolCall} />;
+          case "file_search_call":
+            return <FileSearchCell toolCall={toolCall} />;
+          case "web_search_call":
+            return <WebSearchCell toolCall={toolCall} />;
+          case "mcp_call":
+            return <McpCallCell toolCall={toolCall} />;
+          case "code_interpreter_call":
+            return <CodeInterpreterCell toolCall={toolCall} />;
+          default:
+            return null;
+        }
+      })()}
     </div>
   );
 }

@@ -1,67 +1,78 @@
-import { getGoogleClient } from "@/lib/googleClient";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
+import { authorizationCodeGrant } from "openid-client";
+import { getGoogleClient } from "@/lib/googleClient";
+import { getSessionId, saveTokenSet, OAuthTokens } from "@/lib/session";
+
+const STATE_COOKIE = "gc_oauth_state";
+const VERIFIER_COOKIE = "gc_oauth_verifier";
 
 export async function GET(request: NextRequest) {
+  const config = await getGoogleClient();
+  const jar = await cookies();
+
+  const stateCookie = jar.get(STATE_COOKIE)?.value;
+  const verifier = jar.get(VERIFIER_COOKIE)?.value;
+  const sessionId = await getSessionId();
+
+  // Clear the one-time cookies regardless of outcome
+  jar.delete(STATE_COOKIE);
+  jar.delete(VERIFIER_COOKIE);
+
+  if (!sessionId) {
+    return NextResponse.redirect(new URL("/?error=no-session", request.url));
+  }
+
+  const url = new URL(request.url);
+  const returnedState = url.searchParams.get("state") || undefined;
+  const hasCode = url.searchParams.has("code");
+
+  if (!stateCookie || !verifier || !hasCode || returnedState !== stateCookie) {
+    return NextResponse.redirect(new URL("/?error=invalid_state", request.url));
+  }
+
   try {
-    const { searchParams } = new URL(request.url);
-    const code = searchParams.get("code");
-    const error = searchParams.get("error");
-    
-    if (error) {
-      return Response.redirect("/?error=google_auth_failed");
-    }
-    
-    if (!code) {
-      return Response.redirect("/?error=missing_code");
-    }
-
-    const cookieStore = await cookies();
-    const code_verifier = cookieStore.get("code_verifier")?.value;
-    
-    if (!code_verifier) {
-      return Response.redirect("/?error=missing_verifier");
-    }
-
-    const client = await getGoogleClient();
-    
-    const tokenSet = await client.callback(
-      process.env.GOOGLE_REDIRECT_URI || "http://localhost:3000/api/google/callback",
-      { code },
-      { code_verifier }
+    const tokenResponse = await authorizationCodeGrant(
+      config,
+      url,
+      {
+        expectedState: stateCookie,
+        pkceCodeVerifier: verifier,
+      }
     );
 
-    // Store tokens in cookies
-    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-    
-    cookieStore.set("gc_access_token", tokenSet.access_token!, {
-      httpOnly: true,
+    const now = Date.now();
+    const tokens: OAuthTokens = {
+      access_token: tokenResponse.access_token,
+      refresh_token: tokenResponse.refresh_token,
+      id_token: tokenResponse.id_token,
+      token_type: tokenResponse.token_type,
+      scope: tokenResponse.scope,
+      expires_at:
+        tokenResponse.expires_in != null
+          ? now + tokenResponse.expires_in * 1000
+          : undefined,
+    };
+
+    // Save tokens in memory (demo)
+    saveTokenSet(sessionId, tokens);
+
+    // Also persist tokens in httpOnly cookies so other route handlers can read
+    // them even if they don't share the same in-memory module instance.
+    const cookieOptions = {
+      httpOnly: true as const,
+      sameSite: "lax" as const,
+      path: "/",
       secure: process.env.NODE_ENV === "production",
-      expires,
-    });
-    
-    if (tokenSet.refresh_token) {
-      cookieStore.set("gc_refresh_token", tokenSet.refresh_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", 
-        expires,
-      });
-    }
-    
-    if (tokenSet.expires_at) {
-      cookieStore.set("gc_expires_at", tokenSet.expires_at.toString(), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        expires,
-      });
-    }
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    };
+    if (tokens.access_token) jar.set("gc_access_token", tokens.access_token, cookieOptions);
+    if (tokens.refresh_token) jar.set("gc_refresh_token", tokens.refresh_token, cookieOptions);
+    if (tokens.id_token) jar.set("gc_id_token", tokens.id_token, cookieOptions);
+    if (tokens.expires_at) jar.set("gc_expires_at", String(tokens.expires_at), cookieOptions);
 
-    // Clear code_verifier
-    cookieStore.delete("code_verifier");
-
-    return Response.redirect("/?connected=1");
-  } catch (error) {
-    console.error("Google callback error:", error);
-    return Response.redirect("/?error=callback_failed");
+    return NextResponse.redirect(new URL("/?connected=1", request.url));
+  } catch {
+    return NextResponse.redirect(new URL("/?error=oauth_failed", request.url));
   }
 }

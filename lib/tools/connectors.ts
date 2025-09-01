@@ -1,34 +1,32 @@
-export async function getGoogleConnectors() {
-  const connectors = [];
-  
-  try {
-    const statusResponse = await fetch("/api/google/status");
-    const { connected } = await statusResponse.json();
-    
-    if (!connected) {
-      return connectors;
-    }
+export type GoogleConnectorOptions = {
+  enabled: boolean;
+  accessToken?: string;
+};
 
-    // Add Google Calendar MCP connector
-    connectors.push({
+export function withGoogleConnector(
+  tools: any[],
+  { enabled, accessToken }: GoogleConnectorOptions
+): any[] {
+  if (!enabled || !accessToken) return tools;
+  return [
+    ...tools,
+    {
       type: "mcp",
-      server_label: "google_calendar",
-      server_url: "google_calendar",
+      server_label: "GoogleCalendar",
+      server_description: "Search the user's calendar and read calendar events",
+      connector_id: "connector_googlecalendar",
+      authorization: accessToken,
+      // Defaults to requiring approval; this demo disables prompts for approval
       require_approval: "never",
-      allowed_tools: ["*"]
-    });
-
-    // Add Gmail MCP connector  
-    connectors.push({
+    },
+    {
       type: "mcp",
-      server_label: "gmail",
-      server_url: "gmail",
+      server_label: "GoogleMail",
+      server_description: "Search the user's email inbox and read emails",
+      connector_id: "connector_gmail",
+      authorization: accessToken,
+      // Defaults to requiring approval; this demo disables prompts for approval
       require_approval: "never",
-      allowed_tools: ["*"]
-    });
-  } catch (error) {
-    console.error("Error getting Google connectors:", error);
-  }
-
-  return connectors;
+    },
+  ];
 }

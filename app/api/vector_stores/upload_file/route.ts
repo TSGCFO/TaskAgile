@@ -1,46 +1,23 @@
 import OpenAI from "openai";
-import { NextRequest } from "next/server";
+const openai = new OpenAI();
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
+  const { fileObject } = await request.json();
+
   try {
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
-    const vectorStoreId = formData.get("vectorStoreId") as string;
-    
-    if (!file || !vectorStoreId) {
-      return Response.json({ error: "File and vector store ID are required" }, { status: 400 });
-    }
-
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+    const fileBuffer = Buffer.from(fileObject.content, "base64");
+    const fileBlob = new Blob([fileBuffer], {
+      type: "application/octet-stream",
     });
 
-    // Upload file to OpenAI
-    const uploadedFile = await openai.files.create({
-      file: file,
+    const file = await openai.files.create({
+      file: new File([fileBlob], fileObject.name),
       purpose: "assistants",
     });
 
-    // Add file to vector store
-    const vectorStoreFile = await openai.beta.vectorStores.files.create(
-      vectorStoreId,
-      {
-        file_id: uploadedFile.id,
-      }
-    );
-
-    return Response.json({
-      id: vectorStoreFile.id,
-      file_id: uploadedFile.id,
-      filename: file.name,
-      size: file.size,
-      status: vectorStoreFile.status,
-    });
+    return new Response(JSON.stringify(file), { status: 200 });
   } catch (error) {
-    console.error("File upload error:", error);
-    return Response.json(
-      { error: "Failed to upload file" }, 
-      { status: 500 }
-    );
+    console.error("Error uploading file:", error);
+    return new Response("Error uploading file", { status: 500 });
   }
 }

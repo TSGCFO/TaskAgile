@@ -1,64 +1,59 @@
-import { NextRequest } from "next/server";
-
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const location = searchParams.get("location");
-    const unit = searchParams.get("unit") || "celsius";
+    const unit = searchParams.get("unit");
 
-    if (!location) {
-      return Response.json({ error: "Location parameter is required" }, { status: 400 });
-    }
-
-    // Get coordinates from OpenStreetMap
+    // 1. Get coordinates for the city
     const geoRes = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`
+      `https://nominatim.openstreetmap.org/search?q=${location}&format=json`
     );
     const geoData = await geoRes.json();
-    
+
     if (!geoData.length) {
-      return Response.json({ error: "Location not found" }, { status: 404 });
+      return new Response(JSON.stringify({ error: "Invalid location" }), {
+        status: 404,
+      });
     }
 
     const { lat, lon } = geoData[0];
 
-    // Get weather from Open-Meteo
+    // 2. Fetch weather data from Open-Meteo
     const weatherRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=${unit}`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&temperature_unit=${
+        unit ?? "celsius"
+      }`
     );
+
+    if (!weatherRes.ok) {
+      throw new Error("Failed to fetch weather data");
+    }
+
     const weather = await weatherRes.json();
 
-    return Response.json({
-      location: geoData[0].display_name,
-      temperature: weather.current_weather.temperature,
-      unit: unit,
-      description: getWeatherDescription(weather.current_weather.weathercode),
-      windSpeed: weather.current_weather.windspeed,
+    // 3. Get current UTC time in ISO format
+    const now = new Date();
+    const currentHourISO = now.toISOString().slice(0, 13) + ":00";
+
+    // 4. Get current temperature
+    const index = weather.hourly.time.indexOf(currentHourISO);
+    const currentTemperature =
+      index !== -1 ? weather.hourly.temperature_2m[index] : null;
+
+    if (currentTemperature === null) {
+      return new Response(
+        JSON.stringify({ error: "Temperature data unavailable" }),
+        { status: 500 }
+      );
+    }
+
+    return new Response(JSON.stringify({ temperature: currentTemperature }), {
+      status: 200,
     });
   } catch (error) {
-    console.error("Weather API error:", error);
-    return Response.json({ error: "Failed to get weather data" }, { status: 500 });
+    console.error("Error getting weather:", error);
+    return new Response(JSON.stringify({ error: "Error getting weather" }), {
+      status: 500,
+    });
   }
-}
-
-function getWeatherDescription(code: number): string {
-  const descriptions: Record<number, string> = {
-    0: "Clear sky",
-    1: "Mainly clear",
-    2: "Partly cloudy", 
-    3: "Overcast",
-    45: "Foggy",
-    48: "Depositing rime fog",
-    51: "Light drizzle",
-    53: "Moderate drizzle",
-    55: "Dense drizzle",
-    61: "Slight rain",
-    63: "Moderate rain",
-    65: "Heavy rain",
-    71: "Slight snow fall",
-    73: "Moderate snow fall",
-    75: "Heavy snow fall",
-    95: "Thunderstorm",
-  };
-  return descriptions[code] || "Unknown weather condition";
 }
