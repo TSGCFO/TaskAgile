@@ -82,7 +82,7 @@ const useConversationStore = create<ConversationState>((set) => ({
       
       const conversation = await response.json();
       
-      // Save messages if we have any
+      // Save messages if we have any (filter out non-message items)
       if (state.chatMessages.length > 0) {
         const messagesToSave = state.chatMessages
           .filter(msg => msg.type === 'message')
@@ -118,9 +118,17 @@ const useConversationStore = create<ConversationState>((set) => ({
         content: msg.content,
       }));
       
+      // Filter out reasoning and other non-essential items for conversationItems
+      const filteredConversationItems = loadedMessages
+        .filter((msg: any) => msg.role && msg.content)
+        .map((msg: any) => ({
+          role: msg.role,
+          content: msg.content
+        }));
+      
       set({
         chatMessages: loadedMessages,
-        conversationItems: loadedMessages,
+        conversationItems: filteredConversationItems,
         currentConversationId: id,
       });
     } catch (error) {

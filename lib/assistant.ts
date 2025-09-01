@@ -314,8 +314,11 @@ export const processMessages = async () => {
           toolCallMessage.call_id = item.call_id;
           setChatMessages([...chatMessages]);
         }
-        conversationItems.push(item);
-        setConversationItems([...conversationItems]);
+        // Only add non-reasoning items to conversationItems for API
+        if (item && item.type !== 'reasoning') {
+          conversationItems.push(item);
+          setConversationItems([...conversationItems]);
+        }
         if (
           toolCallMessage &&
           toolCallMessage.type === "tool_call" &&

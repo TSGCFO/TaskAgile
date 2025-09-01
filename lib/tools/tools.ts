@@ -22,7 +22,10 @@ export const getTools = () => {
 
   const addFileSearch = () => {
     if (!state.fileSearchEnabled) return;
-    tools.push({ type: "file_search", vector_store_ids: [state.vectorStore?.id] });
+    // Only add file search if we have a valid vector store ID
+    if (state.vectorStore?.id) {
+      tools.push({ type: "file_search", vector_store_ids: [state.vectorStore.id] });
+    }
   };
 
   const addCodeInterpreter = () => {
