@@ -65,6 +65,7 @@ async function handleTurn(response: Response) {
   const decoder = new TextDecoder();
   let currentMessage: any = null;
   let currentToolCalls: any[] = [];
+  let messageCreated = false;
 
   try {
     while (true) {
@@ -79,9 +80,10 @@ async function handleTurn(response: Response) {
         if (line.startsWith('data: ')) {
           try {
             const eventData = JSON.parse(line.slice(6));
-            const result = await handleEvent(eventData, currentMessage, currentToolCalls);
+            const result = await handleEvent(eventData, currentMessage, currentToolCalls, messageCreated);
             if (result) {
-              currentMessage = result;
+              currentMessage = result.message;
+              messageCreated = result.messageCreated || messageCreated;
             }
           } catch (error) {
             console.error("Error parsing SSE data:", error);
@@ -95,59 +97,39 @@ async function handleTurn(response: Response) {
   }
 }
 
-async function handleEvent(eventData: any, currentMessage: any, currentToolCalls: any[]) {
+async function handleEvent(eventData: any, currentMessage: any, currentToolCalls: any[], messageCreated: boolean) {
   const { addChatMessage, addConversationItem } = useConversationStore.getState();
   
   switch (eventData.event) {
     case 'response.created':
-      currentMessage = {
-        type: "message",
-        role: "assistant",
-        content: []
-      };
-      addChatMessage(currentMessage);
-      return currentMessage;
+      // Response started, but don't create message yet
+      return null;
 
     case 'response.output_item.added':
-      // New text output item added
-      if (!currentMessage) {
+      // Only create message for actual message items, not reasoning
+      if (eventData.data.item?.type === 'message' && !messageCreated) {
         currentMessage = {
           type: "message",
           role: "assistant",
           content: []
         };
+        addChatMessage(currentMessage);
+        return { message: currentMessage, messageCreated: true };
       }
-      if (eventData.data.item?.type === 'message') {
-        const textPart = { type: "output_text", text: "" };
-        currentMessage.content.push(textPart);
-        addChatMessage({ ...currentMessage });
-      }
-      return currentMessage;
+      // Ignore reasoning items
+      return { message: currentMessage, messageCreated };
 
     case 'response.content_part.added':
-      // Text content part added
-      if (!currentMessage) {
-        currentMessage = {
-          type: "message",
-          role: "assistant",
-          content: []
-        };
+      // Only add content part if we have a message (not for reasoning)
+      if (currentMessage && eventData.data.item_id && eventData.data.output_index > 0) {
+        // Don't add another text part, it will be added when text starts streaming
+        return { message: currentMessage, messageCreated };
       }
-      const textPart = { type: "output_text", text: "" };
-      currentMessage.content.push(textPart);
-      addChatMessage({ ...currentMessage });
-      return currentMessage;
+      return { message: currentMessage, messageCreated };
 
     case 'response.output_text.delta':
-      // Text delta for streaming
-      if (!currentMessage) {
-        currentMessage = {
-          type: "message",
-          role: "assistant",
-          content: []
-        };
-      }
-      if (eventData.data.delta) {
+      // Only process text deltas for actual messages (output_index > 0 means it's not reasoning)
+      if (currentMessage && eventData.data.output_index > 0 && eventData.data.delta) {
         if (currentMessage.content.length === 0) {
           currentMessage.content.push({ type: "output_text", text: "" });
         }
@@ -157,7 +139,7 @@ async function handleEvent(eventData: any, currentMessage: any, currentToolCalls
           addChatMessage({ ...currentMessage });
         }
       }
-      return currentMessage;
+      return { message: currentMessage, messageCreated };
 
     case 'response.function_call_delta':
       // Handle function call streaming
@@ -188,7 +170,7 @@ async function handleEvent(eventData: any, currentMessage: any, currentToolCalls
       if (eventData.data.arguments) {
         toolCall.function.arguments += eventData.data.arguments;
       }
-      break;
+      return { message: currentMessage, messageCreated };
 
     case 'response.function_call_done':
       // Execute the function call
@@ -196,14 +178,17 @@ async function handleEvent(eventData: any, currentMessage: any, currentToolCalls
       if (completedCall) {
         await executeFunctionCall(completedCall);
       }
-      break;
+      return { message: currentMessage, messageCreated };
 
     case 'response.done':
     case 'response.output_item.done':
-      if (currentMessage) {
+      if (currentMessage && eventData.data?.item?.type === 'message') {
         addConversationItem(currentMessage);
       }
-      return currentMessage;
+      return { message: currentMessage, messageCreated };
+
+    default:
+      return { message: currentMessage, messageCreated };
   }
 }
 
